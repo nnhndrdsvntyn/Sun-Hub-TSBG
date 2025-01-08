@@ -1,13 +1,13 @@
 -- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
 
 -- 🎨 Load Fluent Library UI 🎨
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SunHubTSBGHuntingKitDuelsServer = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 -- 🎨 Load Fluent Library UI 🎨
 
 -- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
 
 -- 🎨 Load Welcome Notification 🎨
-Fluent:Notify({
+SunHubTSBGHuntingKitDuelsServert:Notify({
         Title = "Loading script...",
         Content = "You are currently in a duels server, the script will load up soon.",
         SubContent = "", -- Optional
@@ -18,7 +18,7 @@ Fluent:Notify({
 -- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
 
 -- 🎨 Window UI 🎨
-local Window = Fluent:CreateWindow({
+local Window = SunHubTSBGHuntingKitDuelsServer:CreateWindow({
     Title = "Sun Hub",
     SubTitle = "Strongest BattleGrounds - Hunting Kit Essentials",
     TabWidth = 160,
