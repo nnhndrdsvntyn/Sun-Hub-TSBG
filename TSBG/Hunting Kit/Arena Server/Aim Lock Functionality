@@ -1,0 +1,48 @@
+-- Aim Lock Functionality Script (example)
+local aimlockEnabled = false
+local aimlockRadius = 35
+local heartbeatConnection
+
+local function getClosestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = aimlockRadius
+    local localPlayer = game.Players.LocalPlayer
+    local localCharacter = localPlayer.Character
+    local localRoot = localCharacter and localCharacter:FindFirstChild("HumanoidRootPart")
+
+    if not localRoot then return end
+
+    for _, player in ipairs(game.Players:GetPlayers()) do
+        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local targetRoot = player.Character.HumanoidRootPart
+            local distance = (localRoot.Position - targetRoot.Position).Magnitude
+
+            if distance < shortestDistance then
+                shortestDistance = distance
+                closestPlayer = player
+            end
+        end
+    end
+    return closestPlayer
+end
+
+local function aimlock()
+    local target = getClosestPlayer()
+    if target and target.Character then
+        local targetRoot = target.Character:FindFirstChild("HumanoidRootPart")
+        local localPlayer = game.Players.LocalPlayer
+        local localCharacter = localPlayer.Character
+        local localRoot = localCharacter and localCharacter:FindFirstChild("HumanoidRootPart")
+
+        if targetRoot and localRoot then
+            local direction = (targetRoot.Position - localRoot.Position).unit
+            localRoot.CFrame = CFrame.new(localRoot.Position, localRoot.Position + Vector3.new(direction.X, 0, direction.Z))
+        end
+    end
+end
+
+-- Return the needed variables and functions for use in the main script
+return {
+    aimlockEnabled = aimlockEnabled,
+    aimlock = aimlock
+}
