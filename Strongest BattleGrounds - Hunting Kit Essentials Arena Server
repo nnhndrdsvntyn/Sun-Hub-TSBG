@@ -1,0 +1,124 @@
+-- 🎨 Load Fluent Library UI 🎨
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+-- 🎨 Load Fluent Library UI 🎨
+
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
+
+-- 🎨 Window UI 🎨
+local Window = Fluent:CreateWindow({
+    Title = "Sun Hub",
+    SubTitle = "Strongest BattleGrounds - Hunting Kit Essentials",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+-- 🎨 Window UI 🎨
+
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
+
+-- 🎨 Tabs UI 🎨
+local Tabs = {
+    Public = Window:AddTab({ Title = "Arena Server", Icon = "users" })
+}
+-- 🎨 Tabs UI 🎨
+
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
+
+-- 🎨 Aim Section UI 🎨
+local AimSection = Tabs.Public:AddSection("Aim")
+-- 🎨 Aim Section UI 🎨
+
+-- 📝 Aim Lock Functionality 📝
+local aimlockModule = loadstring(game:HttpGet("https://pastebin.com/raw/NCRZfj4M"))()  -- Load the external aimlock functionality
+-- 📝 Aim Lock Functionality 📝
+
+-- 🎨 Aim Lock UI Toggle 🎨
+local AimlockToggle = AimSection:AddToggle("Aimlock", {
+    Title = "Aim Lock", 
+    Description = "Will lock onto nearest player within a 35 stud radius",
+    Default = false,
+    Callback = function(state)
+        aimlockModule.aimlockEnabled = state  -- Access the aimlockEnabled variable from the loaded script
+
+        -- 📝 Only run the notification and start heartbeat if the toggle is turned ON 📝
+        if state then
+            -- 🎨 Aim Lock Toggle ON Notification UI 🎨
+            loadstring(game:HttpGet("https://pastebin.com/raw/CAFC26dF"))()
+
+            -- 📝 Start the heartbeat connection for continuous aimlock 📝
+            heartbeatConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if aimlockModule.aimlockEnabled then
+                    aimlockModule.aimlock()  -- Call the aimlock function from the loaded script
+                end
+            end)
+        -- 📝 If state is false (toggle OFF), show the OFF notification only if this isn't the first time turning it off 📝
+        elseif not state then
+            -- Initialize a flag to track if this is the first time turning off the toggle
+            if not _G.HasTurnedOffOnce then
+                _G.HasTurnedOffOnce = true  -- Set it to true after the first toggle off
+            else
+                -- 🎨 Aim Lock Toggle OFF Notification UI 🎨
+                Fluent:Notify({
+                    Title = "❌",
+                    Content = "Aim Lock has been turned OFF",
+                    SubContent = "❌", -- Optional
+                    Duration = 3.5 -- Set to nil to make the notification not disappear
+                })
+            end
+
+            -- 📝 Disconnect the heartbeat connection when aimlock is turned off 📝
+            if heartbeatConnection then
+                heartbeatConnection:Disconnect()
+                heartbeatConnection = nil
+            end
+        end
+    end 
+})
+-- 🎨 Aim Lock UI Toggle 🎨
+
+-- 🎨 Useful Section UI 🎨
+local UsefulSection = Tabs.Public:AddSection("Useful - PC & Mobile Versions")
+-- 🎨 Useful Section UI 🎨
+
+-- 🎨 Useful - PC Section UI 🎨
+local UsefulPCSection = Tabs.Public:AddSection("PC")
+-- 🎨 Useful - PC Section UI 🎨
+
+-- 📝 R-Teleport Functionality 📝
+local teleportScript = loadstring(game:HttpGet("https://pastebin.com/raw/qYA5Ta7a"))()  -- Replace with actual URL or script
+-- 📝 R-Teleport Functionality 📝
+
+-- 🎨 R-Teleport Toggle UI 🎨
+local R_TeleportToggle = Tabs.Public:AddToggle("R-Teleport", {
+    Title = "R-Teleport", 
+    Description = "Press R on your keyboard to teleport to the location of your cursor.",
+    Default = false,
+    Callback = function(state)
+        if state then
+            -- Enable R-Teleport when the toggle is ON
+            teleportScript.toggleTeleport(true)
+        else
+            -- Disable R-Teleport when the toggle is OFF
+            teleportScript.toggleTeleport(false)
+        end
+    end
+})
+-- 🎨 R-Teleport Toggle 🎨
+
+-- 🎨 Useful - Mobile Section UI 🎨
+local UsefulMobileSection = Tabs.Public:AddSection("Mobile")
+-- 🎨 Useful - Mobile Section UI 🎨
+
+-- 🎨 Window UI 🎨
+local Window2 = Fluent:CreateWindow({
+    Title = "Additional Features",
+    SubTitle = "Additional Tools",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true,
+    Theme = "Light",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+-- 🎨 Window UI 🎨
