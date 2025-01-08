@@ -46,7 +46,7 @@ local AimSection = Tabs.Public:AddSection("Aim")
 -- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
 
 -- 📝 Aim Lock Functionality 📝
-local aimlockModule = loadstring(game:HttpGet("https://pastebin.com/raw/NCRZfj4M"))()  -- Load the external aimlock functionality
+local aimlockModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/nnhndrdsvntyn/Sun-Hub/refs/heads/Sun-Hub/TSBG/Hunting%20Kit/Arena%20Server/Aim%20Lock%20Functionality"))()  -- Load the external aimlock functionality
 -- 📝 Aim Lock Functionality 📝
 
 -- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
@@ -62,7 +62,7 @@ local AimlockToggle = AimSection:AddToggle("Aimlock", {
         -- 📝 Only run the notification and start heartbeat if the toggle is turned ON 📝
         if state then
             -- 🎨 Aim Lock Toggle ON Notification UI 🎨
-            loadstring(game:HttpGet("https://pastebin.com/raw/CAFC26dF"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/nnhndrdsvntyn/Sun-Hub/refs/heads/Sun-Hub/TSBG/Hunting%20Kit/Arena%20Server/Aim%20Lock%20Toggle%20ON%20Notification%20UI"))()
 
             -- 📝 Start the heartbeat connection for continuous aimlock 📝
             heartbeatConnection = game:GetService("RunService").Heartbeat:Connect(function()
@@ -110,7 +110,7 @@ local UsefulPCSection = Tabs.Public:AddSection("PC")
 -- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
 
 -- 📝 R-Teleport Functionality 📝
-local teleportScript = loadstring(game:HttpGet("https://pastebin.com/raw/qYA5Ta7a"))()  -- Replace with actual URL or script
+local teleportScript = loadstring(game:HttpGet("https://raw.githubusercontent.com/nnhndrdsvntyn/Sun-Hub/refs/heads/Sun-Hub/TSBG/Hunting%20Kit/Arena%20Server/Aim%20Lock%20Functionality"))()  -- Replace with actual URL or script
 -- 📝 R-Teleport Functionality 📝
 
 -- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
