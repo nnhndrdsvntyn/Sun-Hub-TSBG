@@ -1,0 +1,33 @@
+local teleportEnabled = false
+
+-- Function to handle the teleportation to the cursor's location
+local function teleportToCursor()
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    local mouse = player:GetMouse()
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local rootPart = character.HumanoidRootPart
+        local cursorPosition = mouse.Hit.p -- The position of the cursor in 3D space
+
+        -- Move the character's CFrame to the cursor's position
+        rootPart.CFrame = CFrame.new(cursorPosition) * CFrame.new(0, 0, 0) -- CFrame movement
+    end
+end
+
+-- Detect "R" key press for teleportation
+game:GetService("UserInputService").InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end -- Ignore if input is already processed (e.g., typing in a chat)
+    if input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode == Enum.KeyCode.R and teleportEnabled then
+        teleportToCursor() -- Call the teleportation function when "R" is pressed
+    end
+end)
+
+-- Public method to enable or disable teleport functionality
+local function toggleTeleport(state)
+    teleportEnabled = state
+end
+
+-- Return the toggle function to the caller
+return {
+    toggleTeleport = toggleTeleport
+}
