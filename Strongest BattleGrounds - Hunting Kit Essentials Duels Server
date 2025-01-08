@@ -1,6 +1,19 @@
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
+
 -- 🎨 Load Fluent Library UI 🎨
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 -- 🎨 Load Fluent Library UI 🎨
+
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
+
+-- 🎨 Load Welcome Notification 🎨
+Fluent:Notify({
+        Title = "Loading script...",
+        Content = "You are currently in a duels server, the script will load up soon.",
+        SubContent = "", -- Optional
+        Duration = 10 -- Set to nil to make the notification not disappear
+})
+-- 🎨 Load Welcome Notification 🎨
 
 -- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
 
@@ -30,9 +43,13 @@ local Tabs = {
 local AimSection = Tabs.Public:AddSection("Aim")
 -- 🎨 Aim Section UI 🎨
 
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
+
 -- 📝 Aim Lock Functionality 📝
 local aimlockModule = loadstring(game:HttpGet("https://pastebin.com/raw/NCRZfj4M"))()  -- Load the external aimlock functionality
 -- 📝 Aim Lock Functionality 📝
+
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
 
 -- 🎨 Aim Lock UI Toggle 🎨
 local AimlockToggle = AimSection:AddToggle("Aimlock", {
@@ -78,17 +95,25 @@ local AimlockToggle = AimSection:AddToggle("Aimlock", {
 })
 -- 🎨 Aim Lock UI Toggle 🎨
 
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
+
 -- 🎨 Useful Section UI 🎨
 local UsefulSection = Tabs.Public:AddSection("Useful - PC & Mobile Versions")
 -- 🎨 Useful Section UI 🎨
+
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
 
 -- 🎨 Useful - PC Section UI 🎨
 local UsefulPCSection = Tabs.Public:AddSection("PC")
 -- 🎨 Useful - PC Section UI 🎨
 
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
+
 -- 📝 R-Teleport Functionality 📝
 local teleportScript = loadstring(game:HttpGet("https://pastebin.com/raw/qYA5Ta7a"))()  -- Replace with actual URL or script
 -- 📝 R-Teleport Functionality 📝
+
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
 
 -- 🎨 R-Teleport Toggle UI 🎨
 local R_TeleportToggle = Tabs.Public:AddToggle("R-Teleport", {
@@ -105,20 +130,14 @@ local R_TeleportToggle = Tabs.Public:AddToggle("R-Teleport", {
         end
     end
 })
--- 🎨 R-Teleport Toggle 🎨
+-- 🎨 R-Teleport Toggle UI 🎨
+
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
 
 -- 🎨 Useful - Mobile Section UI 🎨
 local UsefulMobileSection = Tabs.Public:AddSection("Mobile")
 -- 🎨 Useful - Mobile Section UI 🎨
 
--- 🎨 Window UI 🎨
-local Window2 = Fluent:CreateWindow({
-    Title = "Additional Features",
-    SubTitle = "Additional Tools",
-    TabWidth = 160,
-    Size = UDim2.fromOffset(580, 460),
-    Acrylic = true,
-    Theme = "Light",
-    MinimizeKey = Enum.KeyCode.LeftControl
-})
--- 🎨 Window UI 🎨
+-- ⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻⸻
+
+
