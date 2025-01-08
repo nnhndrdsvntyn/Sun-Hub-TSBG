@@ -77,7 +77,7 @@ local AimlockToggle = AimSection:AddToggle("Aimlock", {
                 _G.HasTurnedOffOnce = true  -- Set it to true after the first toggle off
             else
                 -- 🎨 Aim Lock Toggle OFF Notification UI 🎨
-                Fluent:Notify({
+                SunHubTSBGHuntingKitArenaServer:Notify({
                     Title = "❌",
                     Content = "Aim Lock has been turned OFF",
                     SubContent = "❌", -- Optional
