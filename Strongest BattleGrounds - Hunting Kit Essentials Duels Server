@@ -33,7 +33,7 @@ local Window = Fluent:CreateWindow({
 
 -- 🎨 Tabs UI 🎨
 local Tabs = {
-    Public = Window:AddTab({ Title = "Duels Server", Icon = "user" })
+    Duels = Window:AddTab({ Title = "Duels Server", Icon = "user" })
 }
 -- 🎨 Tabs UI 🎨
 
