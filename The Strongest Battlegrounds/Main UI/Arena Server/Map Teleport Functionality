@@ -1,0 +1,25 @@
+local mapLocations = {
+    ["Arena Center"] = Vector3.new(147, 441, 39),
+    ["Mountain 1"] = Vector3.new(-11, 653, -358),
+    ["Mountain 2"] = Vector3.new(244, 699, 399),
+    ["Death Counter Room (Inside)"] = Vector3.new(-64, 43, 20333),
+    ["Death Counter Room (Outside)"] = Vector3.new(-77, 84, 20351),
+    ["Atomic Slash Room (Inside)"] = Vector3.new(1056, 134, 23008),
+    ["Atomic Slash Room (Outside)"] = Vector3.new(1064, 181, 23008),
+    ["Blank Plate"] = Vector3.new(1094, 406, 23043)
+}
+
+local function teleportToLocation(locationName)
+    local coordinates = mapLocations[locationName]
+    if coordinates then
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            player.Character.HumanoidRootPart.CFrame = CFrame.new(coordinates)
+        end
+    end
+end
+
+return {
+    mapLocations = mapLocations,
+    teleportToLocation = teleportToLocation
+}
