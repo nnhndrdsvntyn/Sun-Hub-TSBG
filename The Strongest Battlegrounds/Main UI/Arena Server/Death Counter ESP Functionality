@@ -74,6 +74,7 @@ local function createDeathCounterESP(player)
 
         -- Destroy the ESP components after 10.75 seconds
         delay(10.75, function()
+            -- Remove ESP components for the player
             removeDeathCounterESP(player)
         end)
     end
@@ -103,7 +104,9 @@ local function toggleDeathCounterESP(enable)
     if enable then
         -- Enable ESP for all players with the "HoldingDeathCounter" attribute
         for _, player in ipairs(Players:GetPlayers()) do
-            createDeathCounterESP(player)
+            if player.Character and player.Character:GetAttribute("HoldingDeathCounter") then
+                createDeathCounterESP(player)
+            end
         end
 
         -- Watch for new players joining
