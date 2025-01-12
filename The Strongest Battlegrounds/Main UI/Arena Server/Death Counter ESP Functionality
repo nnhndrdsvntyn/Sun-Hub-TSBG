@@ -2,8 +2,8 @@
 
 local RunService = game:GetService("RunService")
 local Players = game.Players
-local Camera = game.Workspace.CurrentCamera
 local espComponents = {}
+local espEnabled = false  -- This will track whether ESP should be enabled
 
 -- Create ESP for a player
 local function createDeathCounterESP(player)
@@ -88,7 +88,9 @@ end
 
 -- Function to toggle ESP for all players with the Death Counter
 local function toggleDeathCounterESP(enable)
-    if enable then
+    espEnabled = enable
+
+    if espEnabled then
         -- Enable ESP for all players with the "HoldingDeathCounter" attribute
         for _, player in ipairs(Players:GetPlayers()) do
             createDeathCounterESP(player)
