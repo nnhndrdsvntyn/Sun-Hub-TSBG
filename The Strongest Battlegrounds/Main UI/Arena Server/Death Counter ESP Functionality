@@ -2,8 +2,8 @@
 
 local RunService = game:GetService("RunService")
 local Players = game.Players
-local espComponents = {}
-local espEnabled = false  -- This will track whether ESP should be enabled
+local Camera = game.Workspace.CurrentCamera
+local espComponents = {}  -- Store ESP components for players.
 
 -- Create ESP for a player
 local function createDeathCounterESP(player)
@@ -67,7 +67,7 @@ local function createDeathCounterESP(player)
             end
         end
 
-        -- Store the ESP components for cleanup
+        -- Store the ESP components for this player
         espComponents[player.Name] = {billboardGui = billboardGui, auraCubes = auraCubes}
     end
 end
@@ -76,21 +76,24 @@ end
 local function removeDeathCounterESP(player)
     if espComponents[player.Name] then
         local components = espComponents[player.Name]
-        components.billboardGui:Destroy()
-
-        for _, auraCube in ipairs(components.auraCubes) do
-            auraCube:Destroy()
+        if components.billboardGui then
+            components.billboardGui:Destroy()  -- Safely destroy the BillboardGui if it exists
         end
 
+        for _, auraCube in ipairs(components.auraCubes) do
+            if auraCube then
+                auraCube:Destroy()  -- Safely destroy each aura cube if it exists
+            end
+        end
+
+        -- Clean up the stored components for this player
         espComponents[player.Name] = nil
     end
 end
 
--- Function to toggle ESP for all players with the Death Counter
+-- Function to enable or disable ESP detection
 local function toggleDeathCounterESP(enable)
-    espEnabled = enable
-
-    if espEnabled then
+    if enable then
         -- Enable ESP for all players with the "HoldingDeathCounter" attribute
         for _, player in ipairs(Players:GetPlayers()) do
             createDeathCounterESP(player)
