@@ -1,33 +1,26 @@
 local RunService = game:GetService("RunService")
 local Players = game.Players
-local Camera = game.Workspace.CurrentCamera
-local espComponents = {}  -- Store ESP components for players.
+local espComponents = {}  -- Store ESP components for players
 
--- Function to ensure the "HoldingDeathCounter" attribute is set to false when the script first loads
+-- Function to disable the "HoldingDeathCounter" attribute for the local player when the GUI loads
 local function disableDeathCounterOnLoad()
-    -- Disable the attribute for the local player (prevents accidental ESP creation)
-    if game.Players.LocalPlayer and game.Players.LocalPlayer.Character then
-        game.Players.LocalPlayer:SetAttribute("HoldingDeathCounter", false)
-    end
-
-    -- Disable the attribute for other players as well
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player.Character then
-            player:SetAttribute("HoldingDeathCounter", false)
-        end
+    local localPlayer = game.Players.LocalPlayer
+    if localPlayer and localPlayer.Character then
+        localPlayer:SetAttribute("HoldingDeathCounter", false)
     end
 end
 
--- Call the function to disable the attribute on first load
+-- Call the function to disable the attribute for the local player on GUI load
 disableDeathCounterOnLoad()
 
--- Create ESP for a player
+-- Create ESP for a specific player
 local function createDeathCounterESP(player)
+    -- Skip if the player is the local player
     if player == game.Players.LocalPlayer then return end
 
     local playerModel = workspace.Live:FindFirstChild(player.Name)
     if playerModel and playerModel:GetAttribute("HoldingDeathCounter") then
-        -- Create ESP (BillboardGui + aura cubes)
+        -- Create ESP components (BillboardGui + aura cubes)
         local billboardGui = Instance.new("BillboardGui")
         billboardGui.Adornee = playerModel.Head
         billboardGui.Size = UDim2.new(0, 200, 0, 50)
@@ -86,12 +79,16 @@ local function createDeathCounterESP(player)
         -- Store the ESP components for this player
         espComponents[player.Name] = {billboardGui = billboardGui, auraCubes = auraCubes}
 
-        -- Turn off the "HoldingDeathCounter" attribute immediately after the ESP components are created
+        -- Immediately turn off the "HoldingDeathCounter" attribute for this player
         player:SetAttribute("HoldingDeathCounter", false)
+
+        -- Remove the ESP and aura cubes after 10.75 seconds
+        wait(10.75)
+        removeDeathCounterESP(player)
     end
 end
 
--- Remove ESP for a player
+-- Remove ESP for a specific player
 local function removeDeathCounterESP(player)
     if espComponents[player.Name] then
         local components = espComponents[player.Name]
@@ -118,7 +115,7 @@ local function toggleDeathCounterESP(enable)
             createDeathCounterESP(player)
         end
 
-        -- Watch for new players joining
+        -- Watch for new players joining and enable ESP for them
         Players.PlayerAdded:Connect(function(player)
             player.CharacterAdded:Connect(function()
                 if player.Character:GetAttribute("HoldingDeathCounter") then
