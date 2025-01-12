@@ -3,7 +3,6 @@ local RunService = game:GetService("RunService")
 local Players = game.Players
 local Camera = game.Workspace.CurrentCamera
 local espComponents = {}  -- Store ESP components for players.
-local playerCooldowns = {} -- Track cooldowns for players
 
 -- Create ESP for a player
 local function createDeathCounterESP(player)
@@ -104,15 +103,7 @@ local function toggleDeathCounterESP(enable)
     if enable then
         -- Enable ESP for all players with the "HoldingDeathCounter" attribute
         for _, player in ipairs(Players:GetPlayers()) do
-            if not playerCooldowns[player.Name] then
-                createDeathCounterESP(player)
-                -- Set a cooldown for the player
-                playerCooldowns[player.Name] = true
-                -- Disable the cooldown after 10.75 seconds
-                delay(10.75, function()
-                    playerCooldowns[player.Name] = false
-                end)
-            end
+            createDeathCounterESP(player)
         end
 
         -- Watch for new players joining
