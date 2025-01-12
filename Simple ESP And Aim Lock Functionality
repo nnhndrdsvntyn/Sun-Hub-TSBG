@@ -24,14 +24,14 @@ end
 local function updateTurnLock()
     if turnLockEnabled then
         local nearestPlayer, distance = getNearestPlayer()
-        
+
         if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("HumanoidRootPart") then
             if distance <= lockRadius then  -- Check if the player is within the set radius
                 local myHRP = game.Players.LocalPlayer.Character.HumanoidRootPart
                 local targetPosition = nearestPlayer.Character.HumanoidRootPart.Position
                 myHRP.CFrame = CFrame.new(myHRP.Position, Vector3.new(targetPosition.X, myHRP.Position.Y, targetPosition.Z))
                 currentTarget = nearestPlayer.Name
-                distanceToNearestPlayer = string.format("%.0f", distance)  -- Updated formatting
+                distanceToNearestPlayer = string.format("%.0f", distance)
 
                 -- Create or update the sphere above the target
                 if not targetSphere then
@@ -39,48 +39,43 @@ local function updateTurnLock()
                     targetSphere.Shape = Enum.PartType.Ball
                     targetSphere.Size = Vector3.new(1, 1, 1)  -- 1x1x1 sphere
                     targetSphere.Color = Color3.fromRGB(255, 0, 0)  -- Red color
-                    targetSphere.Material = Enum.Material.Neon  -- Set to Neon material
+                    targetSphere.Material = Enum.Material.Neon
                     targetSphere.Anchored = true
                     targetSphere.CanCollide = false
-                    targetSphere.Transparency = 0.5  -- Set transparency to 0.5
+                    targetSphere.Transparency = 0.5
                     targetSphere.Parent = workspace
                 end
-
-                -- Position the sphere above the target
-                targetSphere.Position = nearestPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)  -- 5 studs above the character
+                targetSphere.Position = nearestPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
 
                 -- Create or update the sphere above the local player
                 if not localPlayerSphere then
                     localPlayerSphere = Instance.new("Part")
                     localPlayerSphere.Shape = Enum.PartType.Ball
-                    localPlayerSphere.Size = Vector3.new(1, 1, 1)  -- 1x1x1 sphere
+                    localPlayerSphere.Size = Vector3.new(1, 1, 1)
                     localPlayerSphere.Color = Color3.fromRGB(0, 0, 255)  -- Blue color
-                    localPlayerSphere.Material = Enum.Material.Neon  -- Set to Neon material
+                    localPlayerSphere.Material = Enum.Material.Neon
                     localPlayerSphere.Anchored = true
                     localPlayerSphere.CanCollide = false
-                    localPlayerSphere.Transparency = 0.5  -- Set transparency to 0.5
+                    localPlayerSphere.Transparency = 0.5
                     localPlayerSphere.Parent = workspace
                 end
-
-                -- Position the sphere above the local player's head
-                localPlayerSphere.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)  -- 5 studs above the character
+                localPlayerSphere.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
 
                 -- Create or update the line between the two spheres
                 if not lineBetweenSpheres then
                     lineBetweenSpheres = Instance.new("Part")
-                    lineBetweenSpheres.Size = Vector3.new(0.2, 0.2, 0.2)  -- Thin line
+                    lineBetweenSpheres.Size = Vector3.new(0.2, 0.2, 0.2)
                     lineBetweenSpheres.Anchored = true
                     lineBetweenSpheres.CanCollide = false
                     lineBetweenSpheres.Transparency = 0.5
-                    lineBetweenSpheres.Color = Color3.fromRGB(255, 255 ,255)  -- Yellow line
+                    lineBetweenSpheres.Color = Color3.fromRGB(255, 255, 255)  -- White line
                     lineBetweenSpheres.Material = Enum.Material.Neon
                     lineBetweenSpheres.Parent = workspace
                 end
 
-                -- Update the line's position between the two spheres
                 local midPoint = (targetSphere.Position + localPlayerSphere.Position) / 2
                 lineBetweenSpheres.CFrame = CFrame.new(midPoint, targetSphere.Position)
-                lineBetweenSpheres.Size = Vector3.new(0.2, 0.2, (targetSphere.Position - localPlayerSphere.Position).Magnitude)  -- Adjust line length
+                lineBetweenSpheres.Size = Vector3.new(0.2, 0.2, (targetSphere.Position - localPlayerSphere.Position).Magnitude)
             else
                 -- If the target is out of range, remove the spheres and line
                 if targetSphere then
@@ -136,3 +131,6 @@ local function updateTurnLock()
     TurnLockInput:SetValue(currentTarget)
     DistanceInput:SetValue(distanceToNearestPlayer .. " ")
 end
+
+-- Connect the updateTurnLock function to the Heartbeat event
+game:GetService("RunService").Heartbeat:Connect(updateTurnLock)
