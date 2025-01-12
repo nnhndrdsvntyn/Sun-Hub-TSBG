@@ -26,11 +26,14 @@ function EntityTeleportFunctionality.teleportToEntity(entityName)
         if entityCFrame then
             player.Character.HumanoidRootPart.CFrame = entityCFrame
         else
-            SunHubTheStrongestBattleGroundsMainUIArenaServer_Fluent:Notify({
-                Title = "Teleport Failed",
-                Content = errorMessage,
-                Duration = 2.5
-            })
+            -- Fix for Notify issue
+            if SunHubTheStrongestBattleGroundsMainUIArenaServer_Fluent and SunHubTheStrongestBattleGroundsMainUIArenaServer_Fluent:Notify then
+                SunHubTheStrongestBattleGroundsMainUIArenaServer_Fluent:Notify({
+                    Title = "Teleport Failed",
+                    Content = errorMessage,
+                    Duration = 2.5
+                })
+            end
         end
     end
 end
