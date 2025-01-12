@@ -19,21 +19,14 @@ EntityTeleportFunctionality.entities = {
     end
 }
 
-function EntityTeleportFunctionality.teleportToEntity(entityName, Fluent)
+function EntityTeleportFunctionality.teleportToEntity(entityName)
     local player = game.Players.LocalPlayer
     if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
         local entityCFrame, errorMessage = EntityTeleportFunctionality.entities[entityName]()
         if entityCFrame then
             player.Character.HumanoidRootPart.CFrame = entityCFrame
         else
-            -- Use the passed Fluent object to notify
-            if Fluent and Fluent:Notify then
-                Fluent:Notify({
-                    Title = "Teleport Failed",
-                    Content = errorMessage,
-                    Duration = 2.5
-                })
-            end
+            return errorMessage
         end
     end
 end
