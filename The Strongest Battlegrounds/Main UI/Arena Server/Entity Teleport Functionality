@@ -1,0 +1,38 @@
+local EntityTeleportFunctionality = {}
+
+EntityTeleportFunctionality.entities = {
+    ["Weakest Dummy"] = function()
+        local entity = workspace.Live:FindFirstChild("Weakest Dummy")
+        if entity then
+            return entity:GetPivot()
+        else
+            return nil, "Weakest Dummy not found, The Weakest Dummy Probably Hasn't Spawned."
+        end
+    end,
+    ["The Fracture Of Tundra"] = function()
+        local entity = workspace.Thrown:FindFirstChild("Frozen Lock")
+        if entity then
+            return entity:GetPivot()
+        else
+            return nil, "The Fracture Of Tundra not found, The Fracture Of Tundra Probably Hasn't Spawned."
+        end
+    end
+}
+
+function EntityTeleportFunctionality.teleportToEntity(entityName)
+    local player = game.Players.LocalPlayer
+    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local entityCFrame, errorMessage = EntityTeleportFunctionality.entities[entityName]()
+        if entityCFrame then
+            player.Character.HumanoidRootPart.CFrame = entityCFrame
+        else
+            SunHubTheStrongestBattleGroundsMainUIArenaServer_Fluent:Notify({
+                Title = "Teleport Failed",
+                Content = errorMessage,
+                Duration = 2.5
+            })
+        end
+    end
+end
+
+return EntityTeleportFunctionality
