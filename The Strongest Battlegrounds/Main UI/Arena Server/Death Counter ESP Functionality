@@ -1,19 +1,17 @@
--- Death Counter ESP Functionality
+-- Death Counter ESP Script
+
 local RunService = game:GetService("RunService")
 local Players = game.Players
 local Camera = game.Workspace.CurrentCamera
-local localPlayer = game.Players.LocalPlayer
-
--- This table will hold the ESP components (Billboard and aura cubes) for each player.
 local espComponents = {}
 
--- Function to create the ESP for a player
+-- Create ESP for a player
 local function createDeathCounterESP(player)
-    if player == localPlayer then return end
+    if player == game.Players.LocalPlayer then return end
 
     local playerModel = workspace.Live:FindFirstChild(player.Name)
-
-    if playerModel then
+    if playerModel and playerModel:GetAttribute("HoldingDeathCounter") then
+        -- Create ESP (BillboardGui + aura cubes)
         local billboardGui = Instance.new("BillboardGui")
         billboardGui.Adornee = playerModel.Head
         billboardGui.Size = UDim2.new(0, 200, 0, 50)
@@ -44,25 +42,14 @@ local function createDeathCounterESP(player)
         textLabel.Size = UDim2.new(1, 0, 1, 0)
         textLabel.Parent = billboardGui
 
-        local bodyParts = {
-            playerModel.Head,
-            playerModel["Left Arm"],
-            playerModel["Right Arm"],
-            playerModel["Left Leg"],
-            playerModel["Right Leg"],
-            playerModel.Torso
-        }
-
+        -- Create aura cubes around the player body parts
         local auraCubes = {}
+        local bodyParts = {playerModel.Head, playerModel["Left Arm"], playerModel["Right Arm"], playerModel["Left Leg"], playerModel["Right Leg"], playerModel.Torso}
 
         for _, part in ipairs(bodyParts) do
             if part then
                 local auraCube = Instance.new("Part")
-                if part.Name == "Head" then
-                    auraCube.Size = Vector3.new(part.Size.X, part.Size.Y * 1.5, part.Size.Z)
-                else
-                    auraCube.Size = part.Size * 1.25
-                end
+                auraCube.Size = part.Size * 1.25
                 auraCube.Position = part.Position
                 auraCube.Color = Color3.fromRGB(255, 0, 0)
                 auraCube.Anchored = true
@@ -72,39 +59,20 @@ local function createDeathCounterESP(player)
                 auraCube.Parent = workspace
                 table.insert(auraCubes, auraCube)
 
-                local function updateAuraCube()
-                    if part.Name == "Head" then
-                        auraCube.Size = Vector3.new(part.Size.X, part.Size.Y * 1.5, part.Size.Z)
-                    else
-                        auraCube.Size = part.Size * 1.25
-                    end
+                -- Update aura cube to follow body part
+                RunService.Heartbeat:Connect(function()
                     auraCube.Position = part.Position
                     auraCube.CFrame = part.CFrame
-                end
-
-                RunService.Heartbeat:Connect(updateAuraCube)
+                end)
             end
         end
 
-        local function updateBillboardSize()
-            local distance = (Camera.CFrame.Position - playerModel.Head.Position).Magnitude
-            local scaleFactor = math.clamp(1 / (distance / 50), 0.25, 1)
-            textLabel.TextSize = 20 * scaleFactor
-            billboardGui.Size = UDim2.new(0, 200 * scaleFactor, 0, 50 * scaleFactor)
-            backgroundFrame.Size = UDim2.new(1, 0, 1, 0)
-        end
-
-        RunService.Heartbeat:Connect(updateBillboardSize)
-
-        -- Store the ESP components for later cleanup
-        espComponents[player.Name] = {
-            billboardGui = billboardGui,
-            auraCubes = auraCubes
-        }
+        -- Store the ESP components for cleanup
+        espComponents[player.Name] = {billboardGui = billboardGui, auraCubes = auraCubes}
     end
 end
 
--- Function to remove the ESP for a player
+-- Remove ESP for a player
 local function removeDeathCounterESP(player)
     if espComponents[player.Name] then
         local components = espComponents[player.Name]
@@ -118,32 +86,29 @@ local function removeDeathCounterESP(player)
     end
 end
 
--- This function will be called when the toggle is changed.
-local function toggleDeathCounterESP(state)
-    if state then
-        -- Enable ESP
+-- Function to toggle ESP for all players with the Death Counter
+local function toggleDeathCounterESP(enable)
+    if enable then
+        -- Enable ESP for all players with the "HoldingDeathCounter" attribute
         for _, player in ipairs(Players:GetPlayers()) do
-            local playerModel = workspace.Live:FindFirstChild(player.Name)
-            if playerModel and playerModel:GetAttribute("HoldingDeathCounter") then
-                createDeathCounterESP(player)
-            end
+            createDeathCounterESP(player)
         end
 
         -- Watch for new players joining
         Players.PlayerAdded:Connect(function(player)
-            player.CharacterAdded:Connect(function(character)
-                if character:GetAttribute("HoldingDeathCounter") then
+            player.CharacterAdded:Connect(function()
+                if player.Character:GetAttribute("HoldingDeathCounter") then
                     createDeathCounterESP(player)
                 end
             end)
         end)
     else
-        -- Disable ESP
+        -- Disable ESP for all players
         for _, player in ipairs(Players:GetPlayers()) do
             removeDeathCounterESP(player)
         end
-        espComponents = {}  -- Clear all ESP components
     end
 end
 
+-- Return the toggle function so it can be used externally
 return toggleDeathCounterESP
