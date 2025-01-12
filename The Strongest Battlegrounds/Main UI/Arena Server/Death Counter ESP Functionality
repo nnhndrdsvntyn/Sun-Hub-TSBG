@@ -1,130 +1,149 @@
 -- Death Counter ESP Functionality
-
 local RunService = game:GetService("RunService")
 local Players = game.Players
 local Camera = game.Workspace.CurrentCamera
 local localPlayer = game.Players.LocalPlayer
 
--- Function to handle Death Counter ESP creation
-local function enableDeathCounterESP(state)
-    if state then
-        local function createBillboardAndAuraCubesForPlayer(player)
-            if player == localPlayer then return end
+-- This table will hold the ESP components (Billboard and aura cubes) for each player.
+local espComponents = {}
 
-            local playerModel = workspace.Live:FindFirstChild(player.Name)
+-- Function to create the ESP for a player
+local function createDeathCounterESP(player)
+    if player == localPlayer then return end
 
-            if playerModel then
-                local billboardGui = Instance.new("BillboardGui")
-                billboardGui.Adornee = playerModel.Head
-                billboardGui.Size = UDim2.new(0, 200, 0, 50)
-                billboardGui.StudsOffset = Vector3.new(0, 4, 0)
-                billboardGui.AlwaysOnTop = true
-                billboardGui.Parent = playerModel.Head
+    local playerModel = workspace.Live:FindFirstChild(player.Name)
 
-                local backgroundFrame = Instance.new("Frame")
-                backgroundFrame.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
-                backgroundFrame.Size = UDim2.new(1, 0, 1, 0)
-                backgroundFrame.Parent = billboardGui
+    if playerModel then
+        local billboardGui = Instance.new("BillboardGui")
+        billboardGui.Adornee = playerModel.Head
+        billboardGui.Size = UDim2.new(0, 200, 0, 50)
+        billboardGui.StudsOffset = Vector3.new(0, 4, 0)
+        billboardGui.AlwaysOnTop = true
+        billboardGui.Parent = playerModel.Head
 
-                local uiCorner = Instance.new("UICorner")
-                uiCorner.CornerRadius = UDim.new(0, 10)
-                uiCorner.Parent = backgroundFrame
+        local backgroundFrame = Instance.new("Frame")
+        backgroundFrame.BackgroundColor3 = Color3.fromRGB(139, 0, 0)
+        backgroundFrame.Size = UDim2.new(1, 0, 1, 0)
+        backgroundFrame.Parent = billboardGui
 
-                local uiStroke = Instance.new("UIStroke")
-                uiStroke.Color = Color3.fromRGB(0, 0, 0)
-                uiStroke.Thickness = 4
-                uiStroke.Parent = backgroundFrame
+        local uiCorner = Instance.new("UICorner")
+        uiCorner.CornerRadius = UDim.new(0, 10)
+        uiCorner.Parent = backgroundFrame
 
-                local textLabel = Instance.new("TextLabel")
-                textLabel.Text = "☠ Has Death Counter ☠"
-                textLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
-                textLabel.TextSize = 20
-                textLabel.Font = Enum.Font.SourceSansBold
-                textLabel.BackgroundTransparency = 1
-                textLabel.Size = UDim2.new(1, 0, 1, 0)
-                textLabel.Parent = billboardGui
+        local uiStroke = Instance.new("UIStroke")
+        uiStroke.Color = Color3.fromRGB(0, 0, 0)
+        uiStroke.Thickness = 4
+        uiStroke.Parent = backgroundFrame
 
-                local bodyParts = {
-                    playerModel.Head,
-                    playerModel["Left Arm"],
-                    playerModel["Right Arm"],
-                    playerModel["Left Leg"],
-                    playerModel["Right Leg"],
-                    playerModel.Torso
-                }
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Text = "☠ Has Death Counter ☠"
+        textLabel.TextColor3 = Color3.fromRGB(0, 0, 0)
+        textLabel.TextSize = 20
+        textLabel.Font = Enum.Font.SourceSansBold
+        textLabel.BackgroundTransparency = 1
+        textLabel.Size = UDim2.new(1, 0, 1, 0)
+        textLabel.Parent = billboardGui
 
-                local auraCubes = {}
+        local bodyParts = {
+            playerModel.Head,
+            playerModel["Left Arm"],
+            playerModel["Right Arm"],
+            playerModel["Left Leg"],
+            playerModel["Right Leg"],
+            playerModel.Torso
+        }
 
-                for _, part in ipairs(bodyParts) do
-                    if part then
-                        local auraCube = Instance.new("Part")
-                        if part.Name == "Head" then
-                            auraCube.Size = Vector3.new(part.Size.X, part.Size.Y * 1.5, part.Size.Z)
-                        else
-                            auraCube.Size = part.Size * 1.25
-                        end
-                        auraCube.Position = part.Position
-                        auraCube.Color = Color3.fromRGB(255, 0, 0)
-                        auraCube.Anchored = true
-                        auraCube.CanCollide = false
-                        auraCube.Transparency = 0.5
-                        auraCube.Material = Enum.Material.Neon
-                        auraCube.Parent = workspace
-                        table.insert(auraCubes, auraCube)
+        local auraCubes = {}
 
-                        local function updateAuraCube()
-                            if part.Name == "Head" then
-                                auraCube.Size = Vector3.new(part.Size.X, part.Size.Y * 1.5, part.Size.Z)
-                            else
-                                auraCube.Size = part.Size * 1.25
-                            end
-                            auraCube.Position = part.Position
-                            auraCube.CFrame = part.CFrame
-                        end
+        for _, part in ipairs(bodyParts) do
+            if part then
+                local auraCube = Instance.new("Part")
+                if part.Name == "Head" then
+                    auraCube.Size = Vector3.new(part.Size.X, part.Size.Y * 1.5, part.Size.Z)
+                else
+                    auraCube.Size = part.Size * 1.25
+                end
+                auraCube.Position = part.Position
+                auraCube.Color = Color3.fromRGB(255, 0, 0)
+                auraCube.Anchored = true
+                auraCube.CanCollide = false
+                auraCube.Transparency = 0.5
+                auraCube.Material = Enum.Material.Neon
+                auraCube.Parent = workspace
+                table.insert(auraCubes, auraCube)
 
-                        RunService.Heartbeat:Connect(updateAuraCube)
+                local function updateAuraCube()
+                    if part.Name == "Head" then
+                        auraCube.Size = Vector3.new(part.Size.X, part.Size.Y * 1.5, part.Size.Z)
+                    else
+                        auraCube.Size = part.Size * 1.25
                     end
+                    auraCube.Position = part.Position
+                    auraCube.CFrame = part.CFrame
                 end
 
-                local function updateBillboardSize()
-                    local distance = (Camera.CFrame.Position - playerModel.Head.Position).Magnitude
-                    local scaleFactor = math.clamp(1 / (distance / 50), 0.25, 1)
-                    textLabel.TextSize = 20 * scaleFactor
-                    billboardGui.Size = UDim2.new(0, 200 * scaleFactor, 0, 50 * scaleFactor)
-                    backgroundFrame.Size = UDim2.new(1, 0, 1, 0)
-                end
-
-                RunService.Heartbeat:Connect(updateBillboardSize)
-
-                wait(10.75)
-                billboardGui:Destroy()
-
-                for _, auraCube in ipairs(auraCubes) do
-                    auraCube:Destroy()
-                end
-            else
-                print("Player model not found.")
+                RunService.Heartbeat:Connect(updateAuraCube)
             end
         end
 
-        local function checkHoldingDeathCounterForPlayer(player)
-            local playerModel = workspace.Live:FindFirstChild(player.Name)
-
-            if playerModel and playerModel:GetAttribute("HoldingDeathCounter") then
-                createBillboardAndAuraCubesForPlayer(player)
-                playerModel:SetAttribute("HoldingDeathCounter", false)
-            end
+        local function updateBillboardSize()
+            local distance = (Camera.CFrame.Position - playerModel.Head.Position).Magnitude
+            local scaleFactor = math.clamp(1 / (distance / 50), 0.25, 1)
+            textLabel.TextSize = 20 * scaleFactor
+            billboardGui.Size = UDim2.new(0, 200 * scaleFactor, 0, 50 * scaleFactor)
+            backgroundFrame.Size = UDim2.new(1, 0, 1, 0)
         end
 
-        RunService.Heartbeat:Connect(function()
-            for _, player in ipairs(Players:GetPlayers()) do
-                checkHoldingDeathCounterForPlayer(player)
-            end
-        end)
-    else
-        -- Disable the ESP functionality (cleanup can be done here if necessary)
-        print("Death Counter ESP Disabled")
+        RunService.Heartbeat:Connect(updateBillboardSize)
+
+        -- Store the ESP components for later cleanup
+        espComponents[player.Name] = {
+            billboardGui = billboardGui,
+            auraCubes = auraCubes
+        }
     end
 end
 
-return enableDeathCounterESP
+-- Function to remove the ESP for a player
+local function removeDeathCounterESP(player)
+    if espComponents[player.Name] then
+        local components = espComponents[player.Name]
+        components.billboardGui:Destroy()
+
+        for _, auraCube in ipairs(components.auraCubes) do
+            auraCube:Destroy()
+        end
+
+        espComponents[player.Name] = nil
+    end
+end
+
+-- This function will be called when the toggle is changed.
+local function toggleDeathCounterESP(state)
+    if state then
+        -- Enable ESP
+        for _, player in ipairs(Players:GetPlayers()) do
+            local playerModel = workspace.Live:FindFirstChild(player.Name)
+            if playerModel and playerModel:GetAttribute("HoldingDeathCounter") then
+                createDeathCounterESP(player)
+            end
+        end
+
+        -- Watch for new players joining
+        Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function(character)
+                if character:GetAttribute("HoldingDeathCounter") then
+                    createDeathCounterESP(player)
+                end
+            end)
+        end)
+    else
+        -- Disable ESP
+        for _, player in ipairs(Players:GetPlayers()) do
+            removeDeathCounterESP(player)
+        end
+        espComponents = {}  -- Clear all ESP components
+    end
+end
+
+return toggleDeathCounterESP
