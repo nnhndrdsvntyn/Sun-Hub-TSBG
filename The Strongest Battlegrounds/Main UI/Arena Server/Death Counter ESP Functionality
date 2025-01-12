@@ -1,18 +1,12 @@
+-- Death Counter ESP Script
 local RunService = game:GetService("RunService")
 local Players = game.Players
 local Camera = game.Workspace.CurrentCamera
-local espComponents = {}  -- Store ESP components for players
-local cooldowns = {}  -- Store cooldown timestamps for players
+local espComponents = {}  -- Store ESP components for players.
 
 -- Create ESP for a player
 local function createDeathCounterESP(player)
     if player == game.Players.LocalPlayer then return end
-
-    -- Check if the player has a cooldown
-    local playerCooldown = cooldowns[player.Name]
-    if playerCooldown and tick() - playerCooldown < 10.75 then
-        return  -- Skip creating ESP if the cooldown is still active (10.75 seconds)
-    end
 
     local playerModel = workspace.Live:FindFirstChild(player.Name)
     if playerModel and playerModel:GetAttribute("HoldingDeathCounter") then
@@ -75,13 +69,12 @@ local function createDeathCounterESP(player)
         -- Store the ESP components for this player
         espComponents[player.Name] = {billboardGui = billboardGui, auraCubes = auraCubes}
 
-        -- Set the cooldown for the player (store the time when the ESP was created)
-        cooldowns[player.Name] = tick()
+        -- Turn off the "HoldingDeathCounter" attribute immediately after the ESP components are created
+        player:SetAttribute("HoldingDeathCounter", false)
 
-        -- Set a timer to remove the ESP after 10.75 seconds
+        -- Destroy the ESP components after 10.75 seconds
         delay(10.75, function()
             removeDeathCounterESP(player)
-            cooldowns[player.Name] = nil  -- Reset the cooldown after 10.75 seconds
         end)
     end
 end
