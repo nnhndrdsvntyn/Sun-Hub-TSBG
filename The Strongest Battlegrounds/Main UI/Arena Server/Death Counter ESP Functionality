@@ -1,8 +1,25 @@
--- Death Counter ESP Script
 local RunService = game:GetService("RunService")
 local Players = game.Players
 local Camera = game.Workspace.CurrentCamera
 local espComponents = {}  -- Store ESP components for players.
+
+-- Function to ensure the "HoldingDeathCounter" attribute is set to false when the script first loads
+local function disableDeathCounterOnLoad()
+    -- Disable the attribute for the local player (prevents accidental ESP creation)
+    if game.Players.LocalPlayer and game.Players.LocalPlayer.Character then
+        game.Players.LocalPlayer:SetAttribute("HoldingDeathCounter", false)
+    end
+
+    -- Disable the attribute for other players as well
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Character then
+            player:SetAttribute("HoldingDeathCounter", false)
+        end
+    end
+end
+
+-- Call the function to disable the attribute on first load
+disableDeathCounterOnLoad()
 
 -- Create ESP for a player
 local function createDeathCounterESP(player)
@@ -71,11 +88,6 @@ local function createDeathCounterESP(player)
 
         -- Turn off the "HoldingDeathCounter" attribute immediately after the ESP components are created
         player:SetAttribute("HoldingDeathCounter", false)
-
-        -- Destroy the ESP components after 10.75 seconds
-        delay(10.75, function()
-            removeDeathCounterESP(player)
-        end)
     end
 end
 
@@ -121,6 +133,12 @@ local function toggleDeathCounterESP(enable)
         end
     end
 end
+
+-- Listen for respawns of the local player
+game.Players.LocalPlayer.CharacterAdded:Connect(function(character)
+    -- Set the "HoldingDeathCounter" attribute to false when the player respawns
+    game.Players.LocalPlayer:SetAttribute("HoldingDeathCounter", false)
+end)
 
 -- Return the toggle function so it can be used externally
 return toggleDeathCounterESP
