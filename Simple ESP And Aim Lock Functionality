@@ -1,5 +1,3 @@
--- Aim Tab setup
-local AimSection = Tabs.Main:AddSection("Aim")
 local turnLockEnabled = false
 local currentTarget = ""
 local distanceToNearestPlayer = "0"
