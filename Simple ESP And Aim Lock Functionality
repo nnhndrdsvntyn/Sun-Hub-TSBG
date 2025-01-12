@@ -1,0 +1,205 @@
+-- Initialize variables
+local turnLockEnabled = false
+local currentTarget = ""
+local distanceToNearestPlayer = "0"
+local lockRadius = 50  -- Default radius for lock
+local targetSphere, localPlayerSphere, lineBetweenSpheres
+local playerBoxes = {}
+local playerTracers = {}
+
+-- Function to get the nearest player
+local function getNearestPlayer()
+    local players = game:GetService("Players")
+    local localPlayer = players.LocalPlayer
+    local nearestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, player in ipairs(players:GetPlayers()) do
+        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local magnitude = (player.Character.HumanoidRootPart.Position - localPlayer.Character.HumanoidRootPart.Position).Magnitude
+            if magnitude < shortestDistance then
+                shortestDistance = magnitude
+                nearestPlayer = player
+            end
+        end
+    end
+    return nearestPlayer, shortestDistance
+end
+
+-- Function to update Turn Lock
+local function updateTurnLock()
+    if turnLockEnabled then
+        local nearestPlayer, distance = getNearestPlayer()
+
+        if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            if distance <= lockRadius then
+                local myHRP = game.Players.LocalPlayer.Character.HumanoidRootPart
+                local targetPosition = nearestPlayer.Character.HumanoidRootPart.Position
+                myHRP.CFrame = CFrame.new(myHRP.Position, Vector3.new(targetPosition.X, myHRP.Position.Y, targetPosition.Z))
+                currentTarget = nearestPlayer.Name
+                distanceToNearestPlayer = string.format("%.0f", distance)
+
+                -- Create or update spheres and line
+                if not targetSphere then
+                    targetSphere = Instance.new("Part")
+                    targetSphere.Shape = Enum.PartType.Ball
+                    targetSphere.Size = Vector3.new(1, 1, 1)
+                    targetSphere.Color = Color3.fromRGB(255, 0, 0)
+                    targetSphere.Material = Enum.Material.Neon
+                    targetSphere.Anchored = true
+                    targetSphere.CanCollide = false
+                    targetSphere.Transparency = 0.5
+                    targetSphere.Parent = workspace
+                end
+                targetSphere.Position = nearestPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+
+                if not localPlayerSphere then
+                    localPlayerSphere = Instance.new("Part")
+                    localPlayerSphere.Shape = Enum.PartType.Ball
+                    localPlayerSphere.Size = Vector3.new(1, 1, 1)
+                    localPlayerSphere.Color = Color3.fromRGB(0, 0, 255)
+                    localPlayerSphere.Material = Enum.Material.Neon
+                    localPlayerSphere.Anchored = true
+                    localPlayerSphere.CanCollide = false
+                    localPlayerSphere.Transparency = 0.5
+                    localPlayerSphere.Parent = workspace
+                end
+                localPlayerSphere.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+
+                if not lineBetweenSpheres then
+                    lineBetweenSpheres = Instance.new("Part")
+                    lineBetweenSpheres.Size = Vector3.new(0.2, 0.2, 0.2)
+                    lineBetweenSpheres.Anchored = true
+                    lineBetweenSpheres.CanCollide = false
+                    lineBetweenSpheres.Transparency = 0.5
+                    lineBetweenSpheres.Color = Color3.fromRGB(255, 255 ,255)
+                    lineBetweenSpheres.Material = Enum.Material.Neon
+                    lineBetweenSpheres.Parent = workspace
+                end
+
+                local midPoint = (targetSphere.Position + localPlayerSphere.Position) / 2
+                lineBetweenSpheres.CFrame = CFrame.new(midPoint, targetSphere.Position)
+                lineBetweenSpheres.Size = Vector3.new(0.2, 0.2, (targetSphere.Position - localPlayerSphere.Position).Magnitude)
+            else
+                if targetSphere then targetSphere:Destroy() targetSphere = nil end
+                if localPlayerSphere then localPlayerSphere:Destroy() localPlayerSphere = nil end
+                if lineBetweenSpheres then lineBetweenSpheres:Destroy() lineBetweenSpheres = nil end
+                currentTarget = "❌"
+                distanceToNearestPlayer = "❌"
+            end
+        else
+            if targetSphere then targetSphere:Destroy() targetSphere = nil end
+            if localPlayerSphere then localPlayerSphere:Destroy() localPlayerSphere = nil end
+            if lineBetweenSpheres then lineBetweenSpheres:Destroy() lineBetweenSpheres = nil end
+            currentTarget = "❌"
+            distanceToNearestPlayer = "❌"
+        end
+    else
+        if targetSphere then targetSphere:Destroy() targetSphere = nil end
+        if localPlayerSphere then localPlayerSphere:Destroy() localPlayerSphere = nil end
+        if lineBetweenSpheres then lineBetweenSpheres:Destroy() lineBetweenSpheres = nil end
+        currentTarget = "❌"
+        distanceToNearestPlayer = "❌"
+    end
+end
+
+game:GetService("RunService").Heartbeat:Connect(updateTurnLock)
+
+-- Function to create a 3D box for a player
+local function createBox(player)
+    if player == game.Players.LocalPlayer then return end
+    local box = Instance.new("BoxHandleAdornment")
+    box.Size = Vector3.new(4, 6, 4)
+    box.Color3 = Color3.fromRGB(255, 0, 0)
+    box.Transparency = 0.75
+    box.AlwaysOnTop = true
+    box.ZIndex = 1
+    box.Adornee = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    box.Parent = workspace
+    playerBoxes[player] = box
+end
+
+-- Function to update the 3D box
+local function updateBox(player)
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+    local humanoidRootPart = character.HumanoidRootPart
+    local distance = (humanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    if distance <= lockRadius then
+        local box = playerBoxes[player]
+        if box then
+            box.Visible = true
+            box.Adornee = humanoidRootPart
+        end
+    else
+        local box = playerBoxes[player]
+        if box then
+            box.Visible = false
+        end
+    end
+end
+
+-- Function to remove a player's 3D box
+local function removeBox(player)
+    if playerBoxes[player] then
+        playerBoxes[player]:Destroy()
+        playerBoxes[player] = nil
+    end
+end
+
+-- Player management for ESP
+game.Players.PlayerAdded:Connect(createBox)
+game.Players.PlayerRemoving:Connect(removeBox)
+
+-- Function to create a tracer line for a player
+local function createTracer(player)
+    if player == game.Players.LocalPlayer then return end
+    local tracer = Drawing.new("Line")
+    tracer.Color = Color3.fromRGB(255, 0, 0)
+    tracer.Thickness = 2
+    tracer.Transparency = 1
+    playerTracers[player] = tracer
+end
+
+-- Function to update the tracer line
+local function updateTracer(player)
+    local character = player.Character
+    if not character or not character:FindFirstChild("HumanoidRootPart") then return end
+
+    local humanoidRootPart = character.HumanoidRootPart
+    local distance = (humanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+
+    if distance <= lockRadius then
+        local camera = workspace.CurrentCamera
+        local screenPosition, onScreen = camera:WorldToViewportPoint(humanoidRootPart.Position + Vector3.new(0, 3, 0))
+
+        local tracer = playerTracers[player]
+        if tracer then
+            if onScreen then
+                tracer.From = Vector2.new(camera.ViewportSize.X / 2, 20)
+                tracer.To = Vector2.new(screenPosition.X, screenPosition.Y)
+                tracer.Visible = true
+            else
+                tracer.Visible = false
+            end
+        end
+    else
+        if playerTracers[player] then
+            playerTracers[player]:Remove()
+            playerTracers[player] = nil
+        end
+    end
+end
+
+-- Function to remove a player's tracer
+local function removeTracer(player)
+    if playerTracers[player] then
+        playerTracers[player]:Remove()
+        playerTracers[player] = nil
+    end
+end
+
+-- Player management for tracers
+game.Players.PlayerAdded:Connect(createTracer)
+game.Players.PlayerRemoving:Connect(removeTracer)
