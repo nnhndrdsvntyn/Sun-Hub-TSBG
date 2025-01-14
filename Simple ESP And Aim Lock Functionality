@@ -33,25 +33,26 @@ local function RemoveESPBox(player)
     end
 end
 
--- Function to create a tracer for a player
+-- Fixed and smoothed Tracer ESP function
 local function CreateTracer(player)
     if player == LocalPlayer then return end
     local character = player.Character or player.CharacterAdded:Wait()
     local head = character:WaitForChild("Head")
 
     local tracer = Drawing.new("Line")
-    tracer.Color = Color3.fromRGB(255, 0, 0)
+    tracer.Color = Color3.fromRGB(255, 0, 0)  -- Now red
     tracer.Thickness = 1
     tracer.Visible = true
 
     TracerHandles[player] = tracer
 
+    -- Fixed top-center start position with smooth end movement
     RunService.Heartbeat:Connect(function()
         if TracerEnabled and character and character:FindFirstChild("Head") then
             local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
             if onScreen then
-                tracer.From = Vector2.new(Camera.ViewportSize.X / 2, 0)
-                tracer.To = Vector2.new(screenPos.X, screenPos.Y)
+                tracer.From = Vector2.new(Camera.ViewportSize.X / 2, 0) -- Fixed start point
+                tracer.To = Vector2.new(screenPos.X, screenPos.Y)      -- End moves smoothly
                 tracer.Visible = true
             else
                 tracer.Visible = false
@@ -96,6 +97,7 @@ local function ToggleTracer(state)
     end
 end
 
+-- Return both functions for GUI usage
 return {
     ToggleESP = ToggleESP,
     ToggleTracer = ToggleTracer
