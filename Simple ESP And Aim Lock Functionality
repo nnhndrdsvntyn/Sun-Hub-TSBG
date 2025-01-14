@@ -10,20 +10,44 @@ local InfoDisplayEnabled = true
 local DraggableInfoDisplay = false
 local BoxHandles = {}
 local TracerHandles = {}
+local BlueOrb, RedOrb, ConnectorLine
 
--- UI Setup
-local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
-local LockInfo = Instance.new("TextLabel")
-LockInfo.Parent = ScreenGui
-LockInfo.Position = UDim2.new(0, 10, 1, -120)
-LockInfo.Size = UDim2.new(0, 200, 0, 100)
-LockInfo.TextColor3 = Color3.new(1, 1, 1)
-LockInfo.BackgroundTransparency = 1
-LockInfo.TextSize = 10
-LockInfo.Visible = false
-LockInfo.Text = ""
+-- Create orbs and connector
+local function CreateOrbs()
+    if not BlueOrb then
+        BlueOrb = Instance.new("Part")
+        BlueOrb.Shape = Enum.PartType.Ball
+        BlueOrb.Color = Color3.fromRGB(0, 0, 255)
+        BlueOrb.Size = Vector3.new(1, 1, 1)
+        BlueOrb.Anchored = true
+        BlueOrb.CanCollide = false
+        BlueOrb.Parent = workspace
+    end
 
-local initialPosition = LockInfo.Position
+    if not RedOrb then
+        RedOrb = Instance.new("Part")
+        RedOrb.Shape = Enum.PartType.Ball
+        RedOrb.Color = Color3.fromRGB(255, 0, 0)
+        RedOrb.Size = Vector3.new(1, 1, 1)
+        RedOrb.Anchored = true
+        RedOrb.CanCollide = false
+        RedOrb.Parent = workspace
+    end
+
+    if not ConnectorLine then
+        ConnectorLine = Instance.new("Beam")
+        ConnectorLine.Parent = workspace
+        ConnectorLine.Width0 = 0.1
+        ConnectorLine.Width1 = 0.1
+        ConnectorLine.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
+    end
+end
+
+local function HideOrbs()
+    if BlueOrb then BlueOrb.Transparency = 1 end
+    if RedOrb then RedOrb.Transparency = 1 end
+    if ConnectorLine then ConnectorLine.Enabled = false end
+end
 
 -- Function to find the nearest player
 local function GetNearestPlayer()
@@ -42,18 +66,32 @@ local function GetNearestPlayer()
     return nearestPlayer, shortestDistance
 end
 
--- Function to update player rotation to face nearest player
+-- Function to update player rotation and orbs
 local function UpdatePlayerRotation()
-    if not TurnLockEnabled then 
+    if not TurnLockEnabled then
         LockInfo.Visible = false
-        return 
+        HideOrbs()
+        return
     end
+
+    CreateOrbs()
 
     local nearestPlayer, distance = GetNearestPlayer()
     if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local rootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         local targetPosition = nearestPlayer.Character.HumanoidRootPart.Position
         rootPart.CFrame = CFrame.new(rootPart.Position, Vector3.new(targetPosition.X, rootPart.Position.Y, targetPosition.Z))
+
+        -- Update orbs and connector
+        BlueOrb.Position = rootPart.Position + Vector3.new(0, 3, 0)
+        RedOrb.Position = targetPosition + Vector3.new(0, 3, 0)
+        BlueOrb.Transparency = 0
+        RedOrb.Transparency = 0
+
+        -- Update Connector Line
+        ConnectorLine.Attachment0 = Instance.new("Attachment", BlueOrb)
+        ConnectorLine.Attachment1 = Instance.new("Attachment", RedOrb)
+        ConnectorLine.Enabled = true
 
         -- Update UI
         if InfoDisplayEnabled then
@@ -65,6 +103,7 @@ local function UpdatePlayerRotation()
         end
     else
         LockInfo.Visible = false
+        HideOrbs()
     end
 end
 
