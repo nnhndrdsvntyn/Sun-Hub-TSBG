@@ -13,8 +13,8 @@ local TracerHandles = {}
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local LockInfo = Instance.new("TextLabel")
 LockInfo.Parent = ScreenGui
-LockInfo.Position = UDim2.new(0, 10, 1, -80)
-LockInfo.Size = UDim2.new(0, 200, 0, 60)
+LockInfo.Position = UDim2.new(0, 10, 1, -120)
+LockInfo.Size = UDim2.new(0, 200, 0, 100)
 LockInfo.TextColor3 = Color3.new(1, 1, 1)
 LockInfo.BackgroundTransparency = 1
 LockInfo.TextScaled = true
@@ -53,7 +53,10 @@ local function UpdatePlayerRotation()
 
         -- Update UI
         LockInfo.Visible = true
-        LockInfo.Text = "@" .. nearestPlayer.Name .. "\n- " .. nearestPlayer.DisplayName .. "\n[" .. string.format("%.2f", distance) .. "]\n(in studs)"
+        LockInfo.Text = "| Currently Turning To:" ..
+                        "\n| @" .. nearestPlayer.Name ..
+                        "\n| Display Name - " .. nearestPlayer.DisplayName ..
+                        "\n| Distance: " .. string.format("%.2f", distance)
     else
         LockInfo.Visible = false
     end
