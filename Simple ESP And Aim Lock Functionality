@@ -1,136 +1,147 @@
--- Variables to store the spheres and line
-local targetSphere = nil
-local localPlayerSphere = nil
-local lineBetweenSpheres = nil
+local ESPSection = Tabs.Example:AddSection("ESP Section")
 
-local function getNearestPlayer()
-    local players = game:GetService("Players")
-    local localPlayer = players.LocalPlayer
-    local nearestPlayer = nil
-    local shortestDistance = math.huge
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
 
-    for _, player in ipairs(players:GetPlayers()) do
-        if player ~= localPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            local magnitude = (player.Character.HumanoidRootPart.Position - localPlayer.Character.HumanoidRootPart.Position).Magnitude
-            if magnitude < shortestDistance then
-                shortestDistance = magnitude
-                nearestPlayer = player
-            end
-        end
-    end
-    return nearestPlayer, shortestDistance
+local ESPEnabled = false
+local TracerEnabled = false
+local BoxHandles = {}
+local TracerHandles = {}
+
+-- Function to create ESP box for a player
+local function CreateESPBox(player)
+    if player == LocalPlayer then return end
+    local character = player.Character or player.CharacterAdded:Wait()
+    local rootPart = character:WaitForChild("HumanoidRootPart")
+
+    local highlight = Instance.new("BoxHandleAdornment")
+    highlight.Size = rootPart.Size + Vector3.new(1, 1, 1)
+    highlight.Color3 = Color3.new(1, 0, 0)
+    highlight.Transparency = 0.5
+    highlight.AlwaysOnTop = true
+    highlight.ZIndex = 0
+    highlight.Adornee = rootPart
+    highlight.Parent = rootPart
+
+    BoxHandles[player] = highlight
 end
 
-local function updateTurnLock()
-    if turnLockEnabled then
-        local nearestPlayer, distance = getNearestPlayer()
+local function RemoveESPBox(player)
+    if BoxHandles[player] then
+        BoxHandles[player]:Destroy()
+        BoxHandles[player] = nil
+    end
+end
 
-        if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            if distance <= lockRadius then  -- Check if the player is within the set radius
-                local myHRP = game.Players.LocalPlayer.Character.HumanoidRootPart
-                local targetPosition = nearestPlayer.Character.HumanoidRootPart.Position
-                myHRP.CFrame = CFrame.new(myHRP.Position, Vector3.new(targetPosition.X, myHRP.Position.Y, targetPosition.Z))
-                currentTarget = nearestPlayer.Name
-                distanceToNearestPlayer = string.format("%.0f", distance)
+local function CreateTracer(player)
+    if player == LocalPlayer then return end
+    local character = player.Character or player.CharacterAdded:Wait()
+    local head = character:WaitForChild("Head")
 
-                -- Create or update the sphere above the target
-                if not targetSphere then
-                    targetSphere = Instance.new("Part")
-                    targetSphere.Shape = Enum.PartType.Ball
-                    targetSphere.Size = Vector3.new(1, 1, 1)  -- 1x1x1 sphere
-                    targetSphere.Color = Color3.fromRGB(255, 0, 0)  -- Red color
-                    targetSphere.Material = Enum.Material.Neon
-                    targetSphere.Anchored = true
-                    targetSphere.CanCollide = false
-                    targetSphere.Transparency = 0.5
-                    targetSphere.Parent = workspace
-                end
-                targetSphere.Position = nearestPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+    local tracer = Drawing.new("Line")
+    tracer.Color = Color3.fromRGB(255, 0, 0)
+    tracer.Thickness = 1
+    tracer.Visible = true
 
-                -- Create or update the sphere above the local player
-                if not localPlayerSphere then
-                    localPlayerSphere = Instance.new("Part")
-                    localPlayerSphere.Shape = Enum.PartType.Ball
-                    localPlayerSphere.Size = Vector3.new(1, 1, 1)
-                    localPlayerSphere.Color = Color3.fromRGB(0, 0, 255)  -- Blue color
-                    localPlayerSphere.Material = Enum.Material.Neon
-                    localPlayerSphere.Anchored = true
-                    localPlayerSphere.CanCollide = false
-                    localPlayerSphere.Transparency = 0.5
-                    localPlayerSphere.Parent = workspace
-                end
-                localPlayerSphere.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 5, 0)
+    TracerHandles[player] = tracer
 
-                -- Create or update the line between the two spheres
-                if not lineBetweenSpheres then
-                    lineBetweenSpheres = Instance.new("Part")
-                    lineBetweenSpheres.Size = Vector3.new(0.2, 0.2, 0.2)
-                    lineBetweenSpheres.Anchored = true
-                    lineBetweenSpheres.CanCollide = false
-                    lineBetweenSpheres.Transparency = 0.5
-                    lineBetweenSpheres.Color = Color3.fromRGB(255, 255, 255)  -- White line
-                    lineBetweenSpheres.Material = Enum.Material.Neon
-                    lineBetweenSpheres.Parent = workspace
-                end
-
-                local midPoint = (targetSphere.Position + localPlayerSphere.Position) / 2
-                lineBetweenSpheres.CFrame = CFrame.new(midPoint, targetSphere.Position)
-                lineBetweenSpheres.Size = Vector3.new(0.2, 0.2, (targetSphere.Position - localPlayerSphere.Position).Magnitude)
+    RunService.Heartbeat:Connect(function()
+        if TracerEnabled and character and character:FindFirstChild("Head") then
+            local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+            if onScreen then
+                tracer.From = Vector2.new(Camera.ViewportSize.X / 2, 0)
+                tracer.To = Vector2.new(screenPos.X, screenPos.Y)
+                tracer.Visible = true
             else
-                -- If the target is out of range, remove the spheres and line
-                if targetSphere then
-                    targetSphere:Destroy()
-                    targetSphere = nil
-                end
-                if localPlayerSphere then
-                    localPlayerSphere:Destroy()
-                    localPlayerSphere = nil
-                end
-                if lineBetweenSpheres then
-                    lineBetweenSpheres:Destroy()
-                    lineBetweenSpheres = nil
-                end
-                currentTarget = "❌"
-                distanceToNearestPlayer = "❌"
+                tracer.Visible = false
             end
         else
-            -- No target, remove the spheres and line
-            if targetSphere then
-                targetSphere:Destroy()
-                targetSphere = nil
-            end
-            if localPlayerSphere then
-                localPlayerSphere:Destroy()
-                localPlayerSphere = nil
-            end
-            if lineBetweenSpheres then
-                lineBetweenSpheres:Destroy()
-                lineBetweenSpheres = nil
-            end
-            currentTarget = "❌"
-            distanceToNearestPlayer = "❌"
+            tracer.Visible = false
         end
-    else
-        -- Turn Lock is off, remove the spheres and line
-        if targetSphere then
-            targetSphere:Destroy()
-            targetSphere = nil
-        end
-        if localPlayerSphere then
-            localPlayerSphere:Destroy()
-            localPlayerSphere = nil
-        end
-        if lineBetweenSpheres then
-            lineBetweenSpheres:Destroy()
-            lineBetweenSpheres = nil
-        end
-        currentTarget = "❌"
-        distanceToNearestPlayer = "❌"
-    end
-
-    TurnLockInput:SetValue(currentTarget)
-    DistanceInput:SetValue(distanceToNearestPlayer .. " ")
+    end)
 end
 
--- Connect the updateTurnLock function to the Heartbeat event
-game:GetService("RunService").Heartbeat:Connect(updateTurnLock)
+local function RemoveTracer(player)
+    if TracerHandles[player] then
+        TracerHandles[player]:Remove()
+        TracerHandles[player] = nil
+    end
+end
+
+local function ToggleESP(state)
+    ESPEnabled = state
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            if state then
+                CreateESPBox(player)
+            else
+                RemoveESPBox(player)
+            end
+        end
+    end
+end
+
+local function ToggleTracer(state)
+    TracerEnabled = state
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            if state then
+                CreateTracer(player)
+            else
+                RemoveTracer(player)
+            end
+        end
+    end
+end
+
+ESPSection:AddToggle("ESP_Toggle", {
+    Title = "Box ESP",
+    Description = "Toggles the 3D Box ESP",
+    Default = false,
+    Callback = function(state)
+        ToggleESP(state)
+    end 
+})
+
+ESPSection:AddToggle("Tracer_Toggle", {
+    Title = "Tracer ESP",
+    Description = "Toggles the Tracer ESP",
+    Default = false,
+    Callback = function(state)
+        ToggleTracer(state)
+    end 
+})
+
+local function UpdatePlayerESP(player)
+    if ESPEnabled then
+        CreateESPBox(player)
+    else
+        RemoveESPBox(player)
+    end
+    if TracerEnabled then
+        CreateTracer(player)
+    else
+        RemoveTracer(player)
+    end
+end
+
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function()
+        UpdatePlayerESP(player)
+    end)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    RemoveESPBox(player)
+    RemoveTracer(player)
+end)
+
+for _, player in ipairs(Players:GetPlayers()) do
+    if player ~= LocalPlayer then
+        player.CharacterAdded:Connect(function()
+            UpdatePlayerESP(player)
+        end)
+    end
+end
