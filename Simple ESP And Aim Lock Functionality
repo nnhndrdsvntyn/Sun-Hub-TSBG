@@ -58,10 +58,10 @@ local function UpdatePlayerRotation()
         -- Update UI
         if InfoDisplayEnabled then
             LockInfo.Visible = true
-            LockInfo.Text = "✅ Currently Turning To:" ..
-                            "\n👤 @" .. nearestPlayer.Name ..
-                            "\n👥 Display Name - " .. nearestPlayer.DisplayName ..
-                            "\n📏 Distance: " .. string.format("%.2f", distance)
+            LockInfo.Text = "| Currently Turning To:" ..
+                            "\n| @" .. nearestPlayer.Name ..
+                            "\n| Display Name - " .. nearestPlayer.DisplayName ..
+                            "\n| Distance: " .. string.format("%.2f", distance)
         end
     else
         LockInfo.Visible = false
