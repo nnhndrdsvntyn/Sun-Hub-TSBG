@@ -5,8 +5,42 @@ local RunService = game:GetService("RunService")
 
 local ESPEnabled = false
 local TracerEnabled = false
+local TurnLockEnabled = false
 local BoxHandles = {}
 local TracerHandles = {}
+
+-- Function to find the nearest player
+local function GetNearestPlayer()
+    local nearestPlayer
+    local shortestDistance = math.huge
+
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local distance = (player.Character.HumanoidRootPart.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+            if distance < shortestDistance then
+                shortestDistance = distance
+                nearestPlayer = player
+            end
+        end
+    end
+    return nearestPlayer
+end
+
+-- Function to update player rotation to face nearest player
+local function UpdatePlayerRotation()
+    if not TurnLockEnabled then return end
+
+    local nearestPlayer = GetNearestPlayer()
+    if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local rootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        local targetPosition = nearestPlayer.Character.HumanoidRootPart.Position
+        local direction = (targetPosition - rootPart.Position).Unit
+
+        rootPart.CFrame = CFrame.new(rootPart.Position, Vector3.new(targetPosition.X, rootPart.Position.Y, targetPosition.Z))
+    end
+end
+
+RunService.Heartbeat:Connect(UpdatePlayerRotation)
 
 -- Function to create ESP box for a player
 local function CreateESPBox(player)
@@ -86,7 +120,7 @@ local function RemoveTracer(player)
     end
 end
 
--- Toggles for both ESP types
+-- Toggles for ESP, Tracer, and Turn Lock
 local function ToggleESP(state)
     ESPEnabled = state
     for _, player in ipairs(Players:GetPlayers()) do
@@ -113,6 +147,10 @@ local function ToggleTracer(state)
     end
 end
 
+local function ToggleTurnLock(state)
+    TurnLockEnabled = state
+end
+
 -- Ensure tracers/ESP update when players join or leave
 Players.PlayerAdded:Connect(function(player)
     if ESPEnabled then
@@ -128,8 +166,9 @@ Players.PlayerRemoving:Connect(function(player)
     RemoveTracer(player)
 end)
 
--- Return both functions for GUI usage
+-- Return functions for GUI usage
 return {
     ToggleESP = ToggleESP,
-    ToggleTracer = ToggleTracer
+    ToggleTracer = ToggleTracer,
+    ToggleTurnLock = ToggleTurnLock
 }
