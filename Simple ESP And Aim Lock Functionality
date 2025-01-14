@@ -11,19 +11,25 @@ local TracerHandles = {}
 -- Function to create ESP box for a player
 local function CreateESPBox(player)
     if player == LocalPlayer then return end
-    local character = player.Character or player.CharacterAdded:Wait()
-    local rootPart = character:WaitForChild("HumanoidRootPart")
+    local function onCharacterAdded(character)
+        local rootPart = character:WaitForChild("HumanoidRootPart")
 
-    local highlight = Instance.new("BoxHandleAdornment")
-    highlight.Size = rootPart.Size + Vector3.new(1, 1, 1)
-    highlight.Color3 = Color3.new(1, 0, 0)
-    highlight.Transparency = 0.5
-    highlight.AlwaysOnTop = true
-    highlight.ZIndex = 0
-    highlight.Adornee = rootPart
-    highlight.Parent = rootPart
+        local highlight = Instance.new("BoxHandleAdornment")
+        highlight.Size = rootPart.Size + Vector3.new(1, 1, 1)
+        highlight.Color3 = Color3.new(1, 0, 0)
+        highlight.Transparency = 0.5
+        highlight.AlwaysOnTop = true
+        highlight.ZIndex = 0
+        highlight.Adornee = rootPart
+        highlight.Parent = rootPart
 
-    BoxHandles[player] = highlight
+        BoxHandles[player] = highlight
+    end
+
+    if player.Character then
+        onCharacterAdded(player.Character)
+    end
+    player.CharacterAdded:Connect(onCharacterAdded)
 end
 
 local function RemoveESPBox(player)
@@ -33,26 +39,24 @@ local function RemoveESPBox(player)
     end
 end
 
--- Fixed and smoothed Tracer ESP function
+-- Function to create Tracer ESP for a player
 local function CreateTracer(player)
     if player == LocalPlayer then return end
-    local character = player.Character or player.CharacterAdded:Wait()
-    local head = character:WaitForChild("Head")
-
     local tracer = Drawing.new("Line")
-    tracer.Color = Color3.fromRGB(255, 0, 0)  -- Now red
+    tracer.Color = Color3.fromRGB(255, 0, 0)
     tracer.Thickness = 1
     tracer.Visible = true
 
     TracerHandles[player] = tracer
 
-    -- Fixed top-center start position with smooth end movement
-    RunService.Heartbeat:Connect(function()
-        if TracerEnabled and character and character:FindFirstChild("Head") then
+    local function updateTracer()
+        local character = player.Character
+        local head = character and character:FindFirstChild("Head")
+        if TracerEnabled and head then
             local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
             if onScreen then
-                tracer.From = Vector2.new(Camera.ViewportSize.X / 2, 0) -- Fixed start point
-                tracer.To = Vector2.new(screenPos.X, screenPos.Y)      -- End moves smoothly
+                tracer.From = Vector2.new(Camera.ViewportSize.X / 2, 0)
+                tracer.To = Vector2.new(screenPos.X, screenPos.Y)
                 tracer.Visible = true
             else
                 tracer.Visible = false
@@ -60,6 +64,17 @@ local function CreateTracer(player)
         else
             tracer.Visible = false
         end
+    end
+
+    RunService.Heartbeat:Connect(updateTracer)
+
+    local function onCharacterAdded(character)
+        updateTracer()
+    end
+
+    player.CharacterAdded:Connect(onCharacterAdded)
+    player.CharacterRemoving:Connect(function()
+        tracer.Visible = false
     end)
 end
 
@@ -96,6 +111,21 @@ local function ToggleTracer(state)
         end
     end
 end
+
+-- Ensure tracers/ESP update when players join or leave
+Players.PlayerAdded:Connect(function(player)
+    if ESPEnabled then
+        CreateESPBox(player)
+    end
+    if TracerEnabled then
+        CreateTracer(player)
+    end
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    RemoveESPBox(player)
+    RemoveTracer(player)
+end)
 
 -- Return both functions for GUI usage
 return {
