@@ -33,13 +33,14 @@ local function RemoveESPBox(player)
     end
 end
 
+-- Function to create a tracer for a player
 local function CreateTracer(player)
     if player == LocalPlayer then return end
     local character = player.Character or player.CharacterAdded:Wait()
     local head = character:WaitForChild("Head")
 
     local tracer = Drawing.new("Line")
-    tracer.Color = Color3.fromRGB(255, 0, 0)
+    tracer.Color = Color3.fromRGB(0, 255, 0)
     tracer.Thickness = 1
     tracer.Visible = true
 
@@ -49,7 +50,7 @@ local function CreateTracer(player)
         if TracerEnabled and character and character:FindFirstChild("Head") then
             local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
             if onScreen then
-                tracer.From = Vector2.new(Camera.ViewportSize.X / 2, 0)
+                tracer.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y)
                 tracer.To = Vector2.new(screenPos.X, screenPos.Y)
                 tracer.Visible = true
             else
@@ -68,6 +69,7 @@ local function RemoveTracer(player)
     end
 end
 
+-- Toggles for both ESP types
 local function ToggleESP(state)
     ESPEnabled = state
     for _, player in ipairs(Players:GetPlayers()) do
@@ -94,34 +96,7 @@ local function ToggleTracer(state)
     end
 end
 
-local function UpdatePlayerESP(player)
-    if ESPEnabled then
-        CreateESPBox(player)
-    else
-        RemoveESPBox(player)
-    end
-    if TracerEnabled then
-        CreateTracer(player)
-    else
-        RemoveTracer(player)
-    end
-end
-
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function()
-        UpdatePlayerESP(player)
-    end)
-end)
-
-Players.PlayerRemoving:Connect(function(player)
-    RemoveESPBox(player)
-    RemoveTracer(player)
-end)
-
-for _, player in ipairs(Players:GetPlayers()) do
-    if player ~= LocalPlayer then
-        player.CharacterAdded:Connect(function()
-            UpdatePlayerESP(player)
-        end)
-    end
-end
+return {
+    ToggleESP = ToggleESP,
+    ToggleTracer = ToggleTracer
+}
