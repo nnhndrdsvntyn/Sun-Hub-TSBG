@@ -18,6 +18,7 @@ local function CreateOrbs()
         BlueOrb = Instance.new("Part")
         BlueOrb.Shape = Enum.PartType.Ball
         BlueOrb.Color = Color3.fromRGB(0, 0, 255)
+        BlueOrb.Material = Enum.Material.Neon
         BlueOrb.Size = Vector3.new(1, 1, 1)
         BlueOrb.Anchored = true
         BlueOrb.CanCollide = false
@@ -28,6 +29,7 @@ local function CreateOrbs()
         RedOrb = Instance.new("Part")
         RedOrb.Shape = Enum.PartType.Ball
         RedOrb.Color = Color3.fromRGB(255, 0, 0)
+        RedOrb.Material = Enum.Material.Neon
         RedOrb.Size = Vector3.new(1, 1, 1)
         RedOrb.Anchored = true
         RedOrb.CanCollide = false
@@ -35,18 +37,20 @@ local function CreateOrbs()
     end
 
     if not ConnectorLine then
-        ConnectorLine = Instance.new("Beam")
+        ConnectorLine = Instance.new("Part")
+        ConnectorLine.Size = Vector3.new(0.2, 0.2, 0.2)
+        ConnectorLine.Anchored = true
+        ConnectorLine.CanCollide = false
+        ConnectorLine.Color = Color3.fromRGB(255, 255, 255)
+        ConnectorLine.Material = Enum.Material.Neon
         ConnectorLine.Parent = workspace
-        ConnectorLine.Width0 = 0.1
-        ConnectorLine.Width1 = 0.1
-        ConnectorLine.Color = ColorSequence.new(Color3.fromRGB(255, 255, 255))
     end
 end
 
 local function HideOrbs()
     if BlueOrb then BlueOrb.Transparency = 1 end
     if RedOrb then RedOrb.Transparency = 1 end
-    if ConnectorLine then ConnectorLine.Enabled = false end
+    if ConnectorLine then ConnectorLine.Transparency = 1 end
 end
 
 -- Function to find the nearest player
@@ -89,9 +93,10 @@ local function UpdatePlayerRotation()
         RedOrb.Transparency = 0
 
         -- Update Connector Line
-        ConnectorLine.Attachment0 = Instance.new("Attachment", BlueOrb)
-        ConnectorLine.Attachment1 = Instance.new("Attachment", RedOrb)
-        ConnectorLine.Enabled = true
+        ConnectorLine.Transparency = 0
+        ConnectorLine.Position = (BlueOrb.Position + RedOrb.Position) / 2
+        ConnectorLine.Size = Vector3.new(0.2, 0.2, (BlueOrb.Position - RedOrb.Position).Magnitude)
+        ConnectorLine.CFrame = CFrame.new(BlueOrb.Position, RedOrb.Position) * CFrame.new(0, 0, -ConnectorLine.Size.Z / 2)
 
         -- Update UI
         if InfoDisplayEnabled then
