@@ -15,7 +15,14 @@ local TracerHandles = {}
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local LockInfo = Instance.new("TextLabel")
 LockInfo.Parent = ScreenGui
-LockInfo.Position = UDim2.new(0, 780, 1, -652)
+
+-- Get the screen width
+local screenWidth = game:GetService("Workspace").CurrentCamera.ViewportSize.X
+local rightMargin = screenWidth * 0.1  -- 1/10th of the screen width
+
+-- Position near the top right with a margin
+LockInfo.Position = UDim2.new(1, -rightMargin, 0, 10)  -- 1 Scale for right, -rightMargin to move it left by 1/10th of the width
+
 LockInfo.Size = UDim2.new(0, 200, 0, 100)
 LockInfo.TextColor3 = Color3.new(1, 1, 1)
 LockInfo.BackgroundTransparency = 1
