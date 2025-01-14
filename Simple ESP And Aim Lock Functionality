@@ -30,6 +30,9 @@ local function CreateESPBox(player)
         onCharacterAdded(player.Character)
     end
     player.CharacterAdded:Connect(onCharacterAdded)
+    player.CharacterRemoving:Connect(function()
+        RemoveESPBox(player)
+    end)
 end
 
 local function RemoveESPBox(player)
@@ -68,13 +71,11 @@ local function CreateTracer(player)
 
     RunService.Heartbeat:Connect(updateTracer)
 
-    local function onCharacterAdded(character)
+    player.CharacterAdded:Connect(function()
         updateTracer()
-    end
-
-    player.CharacterAdded:Connect(onCharacterAdded)
+    end)
     player.CharacterRemoving:Connect(function()
-        tracer.Visible = false
+        RemoveTracer(player)
     end)
 end
 
