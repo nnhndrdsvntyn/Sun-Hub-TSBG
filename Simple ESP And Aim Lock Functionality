@@ -70,22 +70,27 @@ end
 
 RunService.Heartbeat:Connect(UpdatePlayerRotation)
 
--- Function to create ESP box for a player
+-- Function to create ESP boxes for a player's body parts
 local function CreateESPBox(player)
     if player == LocalPlayer then return end
     local function onCharacterAdded(character)
-        local rootPart = character:WaitForChild("HumanoidRootPart")
+        local bodyParts = {"Head", "Left Arm", "Right Arm", "Left Leg", "Right Leg", "Torso"}
+        for _, partName in ipairs(bodyParts) do
+            local bodyPart = character:WaitForChild(partName, 5)
+            if bodyPart then
+                local highlight = Instance.new("BoxHandleAdornment")
+                highlight.Size = bodyPart.Size
+                highlight.Color3 = Color3.new(1, 0, 0)
+                highlight.Transparency = 0.5
+                highlight.AlwaysOnTop = true
+                highlight.ZIndex = 0
+                highlight.Adornee = bodyPart
+                highlight.Parent = bodyPart
 
-        local highlight = Instance.new("BoxHandleAdornment")
-        highlight.Size = rootPart.Size + Vector3.new(1, 1, 1)
-        highlight.Color3 = Color3.new(1, 0, 0)
-        highlight.Transparency = 0.5
-        highlight.AlwaysOnTop = true
-        highlight.ZIndex = 0
-        highlight.Adornee = rootPart
-        highlight.Parent = rootPart
-
-        BoxHandles[player] = highlight
+                BoxHandles[player] = BoxHandles[player] or {}
+                table.insert(BoxHandles[player], highlight)
+            end
+        end
     end
 
     if player.Character then
@@ -99,7 +104,9 @@ end
 
 local function RemoveESPBox(player)
     if BoxHandles[player] then
-        BoxHandles[player]:Destroy()
+        for _, box in ipairs(BoxHandles[player]) do
+            box:Destroy()
+        end
         BoxHandles[player] = nil
     end
 end
