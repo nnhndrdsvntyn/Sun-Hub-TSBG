@@ -9,6 +9,18 @@ local TurnLockEnabled = false
 local BoxHandles = {}
 local TracerHandles = {}
 
+-- UI Setup
+local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
+local LockInfo = Instance.new("TextLabel")
+LockInfo.Parent = ScreenGui
+LockInfo.Position = UDim2.new(0, 10, 1, -80)
+LockInfo.Size = UDim2.new(0, 200, 0, 60)
+LockInfo.TextColor3 = Color3.new(1, 1, 1)
+LockInfo.BackgroundTransparency = 1
+LockInfo.TextScaled = true
+LockInfo.Visible = false
+LockInfo.Text = ""
+
 -- Function to find the nearest player
 local function GetNearestPlayer()
     local nearestPlayer
@@ -23,20 +35,27 @@ local function GetNearestPlayer()
             end
         end
     end
-    return nearestPlayer
+    return nearestPlayer, shortestDistance
 end
 
 -- Function to update player rotation to face nearest player
 local function UpdatePlayerRotation()
-    if not TurnLockEnabled then return end
+    if not TurnLockEnabled then 
+        LockInfo.Visible = false
+        return 
+    end
 
-    local nearestPlayer = GetNearestPlayer()
+    local nearestPlayer, distance = GetNearestPlayer()
     if nearestPlayer and nearestPlayer.Character and nearestPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local rootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         local targetPosition = nearestPlayer.Character.HumanoidRootPart.Position
-        local direction = (targetPosition - rootPart.Position).Unit
-
         rootPart.CFrame = CFrame.new(rootPart.Position, Vector3.new(targetPosition.X, rootPart.Position.Y, targetPosition.Z))
+
+        -- Update UI
+        LockInfo.Visible = true
+        LockInfo.Text = "@" .. nearestPlayer.Name .. "\n- " .. nearestPlayer.DisplayName .. "\n[" .. string.format("%.2f", distance) .. "]\n(in studs)"
+    else
+        LockInfo.Visible = false
     end
 end
 
