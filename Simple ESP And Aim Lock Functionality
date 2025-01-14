@@ -1,5 +1,3 @@
-local ESPSection = Tabs.Example:AddSection("ESP Section")
-
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
@@ -95,24 +93,6 @@ local function ToggleTracer(state)
         end
     end
 end
-
-ESPSection:AddToggle("ESP_Toggle", {
-    Title = "Box ESP",
-    Description = "Toggles the 3D Box ESP",
-    Default = false,
-    Callback = function(state)
-        ToggleESP(state)
-    end 
-})
-
-ESPSection:AddToggle("Tracer_Toggle", {
-    Title = "Tracer ESP",
-    Description = "Toggles the Tracer ESP",
-    Default = false,
-    Callback = function(state)
-        ToggleTracer(state)
-    end 
-})
 
 local function UpdatePlayerESP(player)
     if ESPEnabled then
