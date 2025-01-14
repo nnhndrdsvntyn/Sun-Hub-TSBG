@@ -212,9 +212,8 @@ end)
 
 -- Log Info Display Position
 local function LogInfoPosition()
-    -- Log only the Offset values of the position (not Scale)
     local position = LockInfo.Position
-    print(string.format("Current Position - X Offset: %.2f, Y Offset: %.2f", position.X.Offset, position.Y.Offset))
+    print(string.format("%.0f, %.0f, %.0f, %.0f", position.X.Scale * 100, position.X.Offset, position.Y.Scale * 100, position.Y.Offset))
 end
 
 -- Return functions for GUI usage
