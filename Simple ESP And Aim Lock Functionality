@@ -6,6 +6,8 @@ local RunService = game:GetService("RunService")
 local ESPEnabled = false
 local TracerEnabled = false
 local TurnLockEnabled = false
+local InfoDisplayEnabled = true
+local DraggableInfoDisplay = false
 local BoxHandles = {}
 local TracerHandles = {}
 
@@ -20,6 +22,8 @@ LockInfo.BackgroundTransparency = 1
 LockInfo.TextSize = 10
 LockInfo.Visible = false
 LockInfo.Text = ""
+
+local initialPosition = LockInfo.Position
 
 -- Function to find the nearest player
 local function GetNearestPlayer()
@@ -52,11 +56,13 @@ local function UpdatePlayerRotation()
         rootPart.CFrame = CFrame.new(rootPart.Position, Vector3.new(targetPosition.X, rootPart.Position.Y, targetPosition.Z))
 
         -- Update UI
-        LockInfo.Visible = true
-        LockInfo.Text = "| Currently Turning To:" ..
-                        "\n| @" .. nearestPlayer.Name ..
-                        "\n| Display Name - " .. nearestPlayer.DisplayName ..
-                        "\n| Distance: " .. string.format("%.2f", distance)
+        if InfoDisplayEnabled then
+            LockInfo.Visible = true
+            LockInfo.Text = "| Currently Turning To:" ..
+                            "\n| @" .. nearestPlayer.Name ..
+                            "\n| Display Name - " .. nearestPlayer.DisplayName ..
+                            "\n| Distance: " .. string.format("%.2f", distance)
+        end
     else
         LockInfo.Visible = false
     end
@@ -173,6 +179,22 @@ local function ToggleTurnLock(state)
     TurnLockEnabled = state
 end
 
+local function ToggleInfoDisplay(state)
+    InfoDisplayEnabled = state
+end
+
+local function ToggleInfoDraggable(state)
+    DraggableInfoDisplay = state
+    if DraggableInfoDisplay then
+        LockInfo.Active = true
+        LockInfo.Draggable = true
+    else
+        LockInfo.Active = false
+        LockInfo.Draggable = false
+        LockInfo.Position = initialPosition -- Reset to default position if draggable is off
+    end
+end
+
 -- Ensure tracers/ESP update when players join or leave
 Players.PlayerAdded:Connect(function(player)
     if ESPEnabled then
@@ -192,5 +214,7 @@ end)
 return {
     ToggleESP = ToggleESP,
     ToggleTracer = ToggleTracer,
-    ToggleTurnLock = ToggleTurnLock
+    ToggleTurnLock = ToggleTurnLock,
+    ToggleInfoDisplay = ToggleInfoDisplay,
+    ToggleInfoDraggable = ToggleInfoDraggable
 }
