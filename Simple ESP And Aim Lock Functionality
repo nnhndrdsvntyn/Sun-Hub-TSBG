@@ -6,8 +6,6 @@ local RunService = game:GetService("RunService")
 local ESPEnabled = false
 local TracerEnabled = false
 local TurnLockEnabled = false
-local InfoDisplayEnabled = true
-local DraggableInfoDisplay = false
 local BoxHandles = {}
 local TracerHandles = {}
 
@@ -15,15 +13,13 @@ local TracerHandles = {}
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local LockInfo = Instance.new("TextLabel")
 LockInfo.Parent = ScreenGui
-LockInfo.Position = UDim2.new(0, 10, 1, -120)
+LockInfo.Position = UDim2.new(0, 10, 1, -120)  -- Default position
 LockInfo.Size = UDim2.new(0, 200, 0, 100)
 LockInfo.TextColor3 = Color3.new(1, 1, 1)
 LockInfo.BackgroundTransparency = 1
 LockInfo.TextSize = 10
 LockInfo.Visible = false
 LockInfo.Text = ""
-
-local initialPosition = LockInfo.Position
 
 -- Function to find the nearest player
 local function GetNearestPlayer()
@@ -56,13 +52,11 @@ local function UpdatePlayerRotation()
         rootPart.CFrame = CFrame.new(rootPart.Position, Vector3.new(targetPosition.X, rootPart.Position.Y, targetPosition.Z))
 
         -- Update UI
-        if InfoDisplayEnabled then
-            LockInfo.Visible = true
-            LockInfo.Text = "| Currently Turning To:" ..
-                            "\n| @" .. nearestPlayer.Name ..
-                            "\n| Display Name - " .. nearestPlayer.DisplayName ..
-                            "\n| Distance: " .. string.format("%.2f", distance)
-        end
+        LockInfo.Visible = true
+        LockInfo.Text = "| Currently Turning To:" ..
+                        "\n| @" .. nearestPlayer.Name ..
+                        "\n| Display Name - " .. nearestPlayer.DisplayName ..
+                        "\n| Distance: " .. string.format("%.2f", distance)
     else
         LockInfo.Visible = false
     end
@@ -179,22 +173,6 @@ local function ToggleTurnLock(state)
     TurnLockEnabled = state
 end
 
-local function ToggleInfoDisplay(state)
-    InfoDisplayEnabled = state
-end
-
-local function ToggleInfoDraggable(state)
-    DraggableInfoDisplay = state
-    if DraggableInfoDisplay then
-        LockInfo.Active = true
-        LockInfo.Draggable = true
-    else
-        LockInfo.Active = false
-        LockInfo.Draggable = false
-        LockInfo.Position = initialPosition -- Reset to default position if draggable is off
-    end
-end
-
 -- Ensure tracers/ESP update when players join or leave
 Players.PlayerAdded:Connect(function(player)
     if ESPEnabled then
@@ -210,18 +188,9 @@ Players.PlayerRemoving:Connect(function(player)
     RemoveTracer(player)
 end)
 
--- Log Info Display Position
-local function LogInfoPosition()
-    local position = LockInfo.Position
-    print(string.format("Current Position: %.2f, %.2f, %.2f, %.2f", position.X.Offset, position.Y.Offset, position.X.Scale, position.Y.Scale))
-end
-
 -- Return functions for GUI usage
 return {
     ToggleESP = ToggleESP,
     ToggleTracer = ToggleTracer,
-    ToggleTurnLock = ToggleTurnLock,
-    ToggleInfoDisplay = ToggleInfoDisplay,
-    ToggleInfoDraggable = ToggleInfoDraggable,
-    LogInfoPosition = LogInfoPosition
+    ToggleTurnLock = ToggleTurnLock
 }
