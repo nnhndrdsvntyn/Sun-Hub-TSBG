@@ -210,11 +210,18 @@ Players.PlayerRemoving:Connect(function(player)
     RemoveTracer(player)
 end)
 
+-- Log Info Display Position
+local function LogInfoPosition()
+    local position = LockInfo.Position
+    print(string.format("Current Position: %.2f, %.2f, %.2f, %.2f", position.X.Offset, position.Y.Offset, position.X.Scale, position.Y.Scale))
+end
+
 -- Return functions for GUI usage
 return {
     ToggleESP = ToggleESP,
     ToggleTracer = ToggleTracer,
     ToggleTurnLock = ToggleTurnLock,
     ToggleInfoDisplay = ToggleInfoDisplay,
-    ToggleInfoDraggable = ToggleInfoDraggable
+    ToggleInfoDraggable = ToggleInfoDraggable,
+    LogInfoPosition = LogInfoPosition
 }
