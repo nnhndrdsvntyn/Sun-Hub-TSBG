@@ -15,14 +15,7 @@ local TracerHandles = {}
 local ScreenGui = Instance.new("ScreenGui", game.CoreGui)
 local LockInfo = Instance.new("TextLabel")
 LockInfo.Parent = ScreenGui
-
--- Get the screen width
-local screenWidth = game:GetService("Workspace").CurrentCamera.ViewportSize.X
-local rightMargin = screenWidth * 0.1  -- 1/10th of the screen width
-
--- Position near the top right with a margin
-LockInfo.Position = UDim2.new(1, -rightMargin, 0, 10)  -- 1 Scale for right, -rightMargin to move it left by 1/10th of the width
-
+LockInfo.Position = UDim2.new(0, 10, 1, -120)
 LockInfo.Size = UDim2.new(0, 200, 0, 100)
 LockInfo.TextColor3 = Color3.new(1, 1, 1)
 LockInfo.BackgroundTransparency = 1
@@ -65,8 +58,8 @@ local function UpdatePlayerRotation()
         -- Update UI
         if InfoDisplayEnabled then
             LockInfo.Visible = true
-            LockInfo.Text = "| Currently Turning To:" .. 
-                            "\n| @" .. nearestPlayer.Name .. 
+            LockInfo.Text = "| Currently Turning To:" ..
+                            "\n| @" .. nearestPlayer.Name ..
                             "\n| Display Name - " .. nearestPlayer.DisplayName ..
                             "\n| Distance: " .. string.format("%.2f", distance)
         end
@@ -217,11 +210,10 @@ Players.PlayerRemoving:Connect(function(player)
     RemoveTracer(player)
 end)
 
--- Log Info Display Position (correct format)
+-- Log Info Display Position
 local function LogInfoPosition()
     local position = LockInfo.Position
-    -- Log the position in the requested format: X.Scale, X.Offset, Y.Scale, Y.Offset
-    print(string.format("%.0f, %.0f, %.0f, %.0f", position.X.Scale * 100, position.X.Offset, position.Y.Scale * 100, position.Y.Offset))
+    print(string.format("Current Position: %.2f, %.2f, %.2f, %.2f", position.X.Offset, position.Y.Offset, position.X.Scale, position.Y.Scale))
 end
 
 -- Return functions for GUI usage
