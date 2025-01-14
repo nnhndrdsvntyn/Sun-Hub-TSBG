@@ -210,9 +210,10 @@ Players.PlayerRemoving:Connect(function(player)
     RemoveTracer(player)
 end)
 
--- Log Info Display Position
+-- Log Info Display Position (correct format)
 local function LogInfoPosition()
     local position = LockInfo.Position
+    -- Log the position in the requested format: X.Scale, X.Offset, Y.Scale, Y.Offset
     print(string.format("%.0f, %.0f, %.0f, %.0f", position.X.Scale * 100, position.X.Offset, position.Y.Scale * 100, position.Y.Offset))
 end
 
