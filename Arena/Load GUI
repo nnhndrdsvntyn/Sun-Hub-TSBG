@@ -1,0 +1,316 @@
+-- Services
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local workspace = game:GetService("Workspace")
+
+local localPlayer = Players.LocalPlayer
+local animationId = 12447707844 -- Death Counter animation ID
+
+-- Store the detected players and the time their animation finishes
+local detectedPlayers = {}
+
+-- List of moves to check for
+local toolNames = {
+    "Death Counter",
+    "Table Flip",
+    "Serious Punch",
+    "Omni Directional Punch"
+}
+
+-- Function to check if the player is currently performing the animation
+local function isPerformingAnimation(player)
+    local character = player.Character
+    if not character or not character:FindFirstChild("Humanoid") then return nil end
+    
+    local humanoid = character.Humanoid
+    -- Check if the humanoid is currently playing the animation
+    for _, anim in pairs(humanoid:GetPlayingAnimationTracks()) do
+        -- Check if the animation's AnimationId matches the target animation
+        if anim.Animation and tostring(anim.Animation.AnimationId) == "rbxassetid://" .. animationId then
+            return anim -- Return the animation track for its length
+        end
+    end
+    return nil
+end
+
+-- Function to log the player
+local function logDetectedPlayer(player)
+    print("🚨 " .. player.Name .. " did the animation to Activate Saitama Ultimate ")
+end
+
+-- Function to log checking hotbar for tools
+local function checkPlayerHotbar(player)
+    local backpack = player.Backpack
+    local foundTools = 0
+    local missedTools = {}
+
+    -- Log checking the hotbar once before starting the checks
+    print("⏳ Checking " .. player.Name .. "'s Hotbar")
+
+    -- Check each tool in the list
+    for _, toolName in pairs(toolNames) do
+        -- Check if the tool is in the hotbar
+        local tool = backpack:FindFirstChild(toolName)
+        if tool then
+            foundTools = foundTools + 1
+            print("⚔ Found the " .. toolName .. " move in " .. player.Name .. "'s hotbar...")
+        else
+            table.insert(missedTools, toolName)
+            print("🔴 Couldn't find the " .. toolName .. " move in " .. player.Name .. "'s hotbar...")
+        end
+    end
+
+    -- Log the final result
+    if foundTools == #toolNames then
+        print("✅ Found 4/4 Tools In " .. player.Name .. "'s Hotbar")
+        return true
+    else
+        print("⛔ Found " .. foundTools .. "/4 Moves In " .. player.Name .. "'s Hotbar")
+        return false
+    end
+end
+
+-- Function to check the Ulted attribute using the provided method
+local function checkUltedAttribute(player)
+    -- Retrieve the target object from workspace
+    local detectedPlayerPath = workspace:WaitForChild("Live"):WaitForChild(player.Name)
+    
+    -- Check if the object exists
+    if detectedPlayerPath then
+        local ultedFound = false  -- Flag to track if the Ulted attribute is found
+        -- Iterate through all attributes of the object
+        for attributeName, attributeValue in pairs(detectedPlayerPath:GetAttributes()) do
+            -- Check if the attribute name is 'Ulted'
+            if attributeName == "Ulted" then
+                -- Log the state (On/Off)
+                print("🟢" .. player.Name .. " has the Ulted Attribute!")
+                ultedFound = true  -- Set the flag to true if Ulted is found
+                if attributeValue == true then
+                    print("✅ The Ulted Attribute is ON for " .. player.Name)
+                    return true
+                else
+                    print("⛔ The Ulted Attribute is OFF for " .. player.Name)
+                    return false
+                end
+            end
+        end
+        -- If the Ulted attribute was not found
+        if not ultedFound then
+            print("🔴 " .. player.Name .. " does not have the Ulted Attribute!")
+            return false
+        end
+    else
+        print("❗ " .. player.Name .. " not found in workspace.Live")
+        return false
+    end
+end
+
+-- Function to send a notification in CoreGui
+local function sendNotification(player, message, title)
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = message,
+        Duration = 5
+    })
+end
+
+-- Heartbeat check to continuously detect animations
+local detectingUltimate = false  -- Flag to keep track of detection state
+
+-- Function to start detecting the Saitama Ultimate activation
+local function startDetectingUltimate()
+    detectingUltimate = true
+    -- Heartbeat check to continuously detect animations
+    RunService.Heartbeat:Connect(function()
+        if detectingUltimate then
+            for _, player in pairs(Players:GetPlayers()) do
+                -- Exclude the local player
+                if player ~= localPlayer then
+                    -- Check if this player is performing the animation and hasn't been logged recently
+                    local animationTrack = isPerformingAnimation(player)
+                    if animationTrack and not detectedPlayers[player] then
+                        -- Log the player and mark as detected
+                        logDetectedPlayer(player)
+                        detectedPlayers[player] = true
+                        
+                        -- Wait 1.5 seconds after detecting animation before checking the hotbar
+                        wait(1.5)
+
+                        -- Log the check for ultimate
+                        print("🔄 Checking If " .. player.Name .. " actually activated Ultimate...")
+
+                        -- Check the player's hotbar for the tools
+                        local movesCheck = checkPlayerHotbar(player)
+
+                        -- Wait 0.25 seconds after tools check before checking the attributes
+                        wait(0.25)
+
+                        -- Log the proceeding to check attributes
+                        print("⏳ Proceeding to check " .. player.Name .. "'s Attributes")
+
+                        -- Check the Ulted attribute
+                        local attributeCheck = checkUltedAttribute(player)
+
+                        -- Calculate the success rate
+                        local animationCheck = animationTrack and true or false
+                        local animationResult = animationCheck and "✅" or "⛔"
+                        local movesResult = movesCheck and "✅" or "⛔"
+                        local attributeResult = attributeCheck and "✅" or "⛔"
+
+                        -- Calculate the total percentage chance
+                        local chance = 0
+                        if animationCheck then chance = chance + 2 end
+                        if movesCheck then chance = chance + 18 end
+                        if attributeCheck then chance = chance + 80 end
+
+                        -- Log the conclusion
+                        print("Conclusion: ")
+                        print("Animation Check: " .. animationResult)
+                        if animationCheck then print("Might have activated Ultimate 🤷‍♂️ +2%") end
+                        print("Moves Check: " .. movesResult)
+                        if movesCheck then print("Probably activated Ultimate 👍 +18%") end
+                        print("Attribute Check: " .. attributeResult)
+                        if attributeCheck then print("Definitely activated Ultimate ✅ +80%") end
+                        print(string.format("%d/3 Checks Succeeded", (animationCheck and 1 or 0) + (movesCheck and 1 or 0) + (attributeCheck and 1 or 0)))
+
+                        -- Final Conclusion based on the chance
+                        if chance < 3 then
+                            print("🔴 " .. player.Name .. " Most likely did not activate Saitama Ultimate.")
+                            sendNotification(player, "🔴 " .. player.Name .. " Most likely did not activate Saitama Ultimate.", "Conclusion")
+                        elseif chance >= 18 and chance < 20 then
+                            print("🟡 " .. player.Name .. " Might have activated Saitama Ultimate...")
+                            sendNotification(player, "🟡 " .. player.Name .. " Might have activated Saitama Ultimate...", "Conclusion")
+                        elseif chance == 100 then
+                            print("🟢 " .. player.Name .. " Definitely activated Saitama Ultimate!")
+                            sendNotification(player, "🟢 " .. player.Name .. " Definitely activated Saitama Ultimate!", "Conclusion")
+                        end
+
+                        -- Wait until the animation finishes, plus an extra 0.25 seconds buffer
+                        wait(animationTrack.Length + 0.25)
+
+                        -- Remove the player from the detected list after the wait
+                        detectedPlayers[player] = nil
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- Function to stop detecting the Saitama Ultimate activation
+local function stopDetectingUltimate()
+    detectingUltimate = false
+end
+
+-- Function to send the Death Counter notification
+local function sendDeathCounterNotification(player)
+    StarterGui:SetCore("SendNotification", {
+        Title = "🟢 " .. player.Name .. " Activated Death Counter",
+        Text = "When this notification disappears, then their Death Counter is gone",
+        Duration = 10.5  -- Notification duration set to 10.5 seconds
+    })
+end
+
+-- Function to check for the "HoldingDeathCounter" attribute
+local function checkHoldingDeathCounter(player)
+    -- Retrieve the target object from workspace
+    local detectedPlayerPath = workspace:WaitForChild("Live"):WaitForChild(player.Name)
+    
+    -- Check if the object exists
+    if detectedPlayerPath then
+        -- Iterate through all attributes of the object
+        for attributeName, attributeValue in pairs(detectedPlayerPath:GetAttributes()) do
+            -- Check if the attribute name is 'HoldingDeathCounter' and if it is true
+            if attributeName == "HoldingDeathCounter" and attributeValue == true then
+                -- Log the state
+                print("🟢 " .. player.Name .. " activated Death Counter")
+                -- Send the notification
+                sendDeathCounterNotification(player)
+            end
+        end
+    else
+        print("❗ " .. player.Name .. " not found in workspace.Live")
+    end
+end
+
+-- Heartbeat check to continuously detect the "HoldingDeathCounter" attribute
+local detectingDeathCounter = false
+
+-- Function to start detecting the Death Counter activation
+local function startDetectingDeathCounter()
+    detectingDeathCounter = true
+    -- Heartbeat check to continuously detect the attribute
+    RunService.Heartbeat:Connect(function()
+        if detectingDeathCounter then
+            for _, player in pairs(Players:GetPlayers()) do
+                -- Exclude the local player
+                if player ~= localPlayer then
+                    -- Check if this player has the "HoldingDeathCounter" attribute
+                    checkHoldingDeathCounter(player)
+                end
+            end
+        end
+    end)
+end
+
+-- Function to stop detecting the Death Counter activation
+local function stopDetectingDeathCounter()
+    detectingDeathCounter = false
+end
+
+-- Now load the UI
+local SunHubTSBGArena = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+
+local Window = SunHubTSBGArena:CreateWindow({
+    Title = "TSBG - Arena",
+    SubTitle = "by Lib",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(580, 460),
+    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl -- Used when theres no MinimizeKeybind
+})
+
+-- Fluent provides Lucide Icons, they are optional
+local Tabs = {
+    Main = Window:AddTab({ Title = "Main", Icon = "" }),
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+}
+
+local DetectSection = Tabs.Main:AddSection("Detect")
+
+-- Create the toggles for Ultimate and Death Counter detection
+local DetectSaitamaUltimateToggle = DetectSection:AddToggle("Detect Saitama Ultimate", 
+{
+    Title = "Detect Saitama Ultimate Activation", 
+    Description = "Will detect and notify you when another player activates Saitama Ultimate.",
+    Default = false,
+    Callback = function(state)
+        if state then
+            -- Enable detection when toggle is turned on
+            print("Detection Enabled - Detecting Saitama Ultimate Activation")
+            startDetectingUltimate()  -- Start detecting logic
+        else
+            -- Disable detection when toggle is turned off
+            print("Detection Disabled - No longer detecting Saitama Ultimate")
+            stopDetectingUltimate()  -- Stop detecting logic
+        end
+    end 
+})
+
+local DetectSaitamaDeathCounterToggle = DetectSection:AddToggle("Detect Saitama Death Counter", 
+{
+    Title = "Detect Death Counter Activation", 
+    Description = "Will detect and notify you when another player activates Saitama Death Counter.",
+    Default = false,
+    Callback = function(state)
+        if state then
+            print("Death Counter Detection Enabled")
+            startDetectingDeathCounter()  -- Start the Death Counter detection
+        else
+            print("Death Counter Detection Disabled")
+            stopDetectingDeathCounter()  -- Stop the Death Counter detection
+        end
+    end 
+})
