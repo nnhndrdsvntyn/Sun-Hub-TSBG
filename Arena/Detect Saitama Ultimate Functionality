@@ -1,8 +1,8 @@
 -- Services
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
-local workspace = game:GetService("Workspace")
 local StarterGui = game:GetService("StarterGui")
+local workspace = game:GetService("Workspace")
 
 local localPlayer = Players.LocalPlayer
 local animationId = 12447707844 -- Death Counter animation ID
