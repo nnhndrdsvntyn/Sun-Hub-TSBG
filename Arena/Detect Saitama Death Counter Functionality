@@ -1,0 +1,58 @@
+-- Services
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local workspace = game:GetService("Workspace")
+
+local localPlayer = Players.LocalPlayer
+
+-- Function to check for the "HoldingDeathCounter" attribute
+local function checkHoldingDeathCounter(player)
+    -- Retrieve the player's character and its attributes
+    local character = player.Character
+    if not character then return end
+
+    -- Check if the player has the "HoldingDeathCounter" attribute
+    if character:FindFirstChild("HoldingDeathCounter") then
+        local holdingDeathCounter = character.HoldingDeathCounter.Value
+        if holdingDeathCounter then
+            -- If the attribute is found and true, notify the user
+            print("🟢 " .. player.Name .. " activated Death Counter")
+            sendDeathCounterNotification(player)
+        end
+    end
+end
+
+-- Function to send the Death Counter notification
+local function sendDeathCounterNotification(player)
+    StarterGui:SetCore("SendNotification", {
+        Title = "🟢 " .. player.Name .. " Activated Death Counter",
+        Text = "When this notification disappears, then their Death Counter is gone",
+        Duration = 10.5  -- Notification duration set to 10.5 seconds
+    })
+end
+
+-- Heartbeat check to continuously detect the "HoldingDeathCounter" attribute
+local detectingDeathCounter = false
+
+-- Function to start detecting the Death Counter activation
+local function startDetectingDeathCounter()
+    detectingDeathCounter = true
+    -- Heartbeat check to continuously detect the attribute
+    RunService.Heartbeat:Connect(function()
+        if detectingDeathCounter then
+            for _, player in pairs(Players:GetPlayers()) do
+                -- Exclude the local player
+                if player ~= localPlayer then
+                    -- Check if this player has the "HoldingDeathCounter" attribute
+                    checkHoldingDeathCounter(player)
+                end
+            end
+        end
+    end)
+end
+
+-- Function to stop detecting the Death Counter activation
+local function stopDetectingDeathCounter()
+    detectingDeathCounter = false
+end
