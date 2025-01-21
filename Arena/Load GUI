@@ -7,12 +7,12 @@ local StarterGui = game:GetService("StarterGui")
 local workspace = game:GetService("Workspace")
 
 local localPlayer = Players.LocalPlayer
-local animationId = 12447707844 -- Death Counter animation ID
+local animationId = 12447707844 -- Saitama Ultimate Activation animation ID
 
 -- Store the detected players and the time their animation finishes
 local detectedPlayers = {}
 
--- List of moves to check for
+-- List of moves to check for Saitama Ultimate
 local toolNames = {
     "Death Counter",
     "Table Flip",
@@ -21,7 +21,7 @@ local toolNames = {
 }
 
 -- Function to check if the player is currently performing the animation
-local function isPerformingAnimation(player)
+local function isPerformingSaitamaAnimation(player)
     local character = player.Character
     if not character or not character:FindFirstChild("Humanoid") then return nil end
     
@@ -37,12 +37,12 @@ local function isPerformingAnimation(player)
 end
 
 -- Function to log the player
-local function logDetectedPlayer(player)
+local function logSaitamaDetectedPlayer(player)
     print("🚨 " .. player.Name .. " did the animation to Activate Saitama Ultimate ")
 end
 
 -- Function to log checking hotbar for tools
-local function checkPlayerHotbar(player)
+local function checkSaitamaPlayerHotbar(player)
     local backpack = player.Backpack
     local foundTools = 0
     local missedTools = {}
@@ -74,7 +74,7 @@ local function checkPlayerHotbar(player)
 end
 
 -- Function to check the Ulted attribute using the provided method
-local function checkUltedAttribute(player)
+local function checkSaitamaUltedAttribute(player)
     -- Retrieve the target object from workspace
     local detectedPlayerPath = workspace:WaitForChild("Live"):WaitForChild(player.Name)
     
@@ -109,7 +109,7 @@ local function checkUltedAttribute(player)
 end
 
 -- Function to send a notification in CoreGui
-local function sendNotification(player, message, title)
+local function sendSaitamaNotification(player, message, title)
     StarterGui:SetCore("SendNotification", {
         Title = title,
         Text = message,
@@ -118,22 +118,22 @@ local function sendNotification(player, message, title)
 end
 
 -- Heartbeat check to continuously detect animations
-local detectingUltimate = false  -- Flag to keep track of detection state
+local detectingSaitamaUltimate = false  -- Flag to keep track of detection state
 
 -- Function to start detecting the Saitama Ultimate activation
-local function startDetectingUltimate()
-    detectingUltimate = true
+local function startDetectingSaitamaUltimate()
+    detectingSaitamaUltimate = true
     -- Heartbeat check to continuously detect animations
     RunService.Heartbeat:Connect(function()
-        if detectingUltimate then
+        if detectingSaitamaUltimate then
             for _, player in pairs(Players:GetPlayers()) do
                 -- Exclude the local player
                 if player ~= localPlayer then
                     -- Check if this player is performing the animation and hasn't been logged recently
-                    local animationTrack = isPerformingAnimation(player)
+                    local animationTrack = isPerformingSaitamaAnimation(player)
                     if animationTrack and not detectedPlayers[player] then
                         -- Log the player and mark as detected
-                        logDetectedPlayer(player)
+                        logSaitamaDetectedPlayer(player)
                         detectedPlayers[player] = true
                         
                         -- Wait 1.5 seconds after detecting animation before checking the hotbar
@@ -143,7 +143,7 @@ local function startDetectingUltimate()
                         print("🔄 Checking If " .. player.Name .. " actually activated Ultimate...")
 
                         -- Check the player's hotbar for the tools
-                        local movesCheck = checkPlayerHotbar(player)
+                        local movesCheck = checkSaitamaPlayerHotbar(player)
 
                         -- Wait 0.25 seconds after tools check before checking the attributes
                         wait(0.25)
@@ -152,7 +152,7 @@ local function startDetectingUltimate()
                         print("⏳ Proceeding to check " .. player.Name .. "'s Attributes")
 
                         -- Check the Ulted attribute
-                        local attributeCheck = checkUltedAttribute(player)
+                        local attributeCheck = checkSaitamaUltedAttribute(player)
 
                         -- Calculate the success rate
                         local animationCheck = animationTrack and true or false
@@ -179,13 +179,13 @@ local function startDetectingUltimate()
                         -- Final Conclusion based on the chance
                         if chance < 3 then
                             print("🔴 " .. player.Name .. " Most likely did not activate Saitama Ultimate.")
-                            sendNotification(player, "🔴 " .. player.Name .. " Most likely did not activate Saitama Ultimate.", "Conclusion")
+                            sendSaitamaNotification(player, "🔴 " .. player.Name .. " Most likely did not activate Saitama Ultimate.", "Conclusion")
                         elseif chance >= 18 and chance < 20 then
                             print("🟡 " .. player.Name .. " Might have activated Saitama Ultimate...")
-                            sendNotification(player, "🟡 " .. player.Name .. " Might have activated Saitama Ultimate...", "Conclusion")
+                            sendSaitamaNotification(player, "🟡 " .. player.Name .. " Might have activated Saitama Ultimate...", "Conclusion")
                         elseif chance == 100 then
                             print("🟢 " .. player.Name .. " Definitely activated Saitama Ultimate!")
-                            sendNotification(player, "🟢 " .. player.Name .. " Definitely activated Saitama Ultimate!", "Conclusion")
+                            sendSaitamaNotification(player, "🟢 " .. player.Name .. " Definitely activated Saitama Ultimate!", "Conclusion")
                         end
 
                         -- Wait until the animation finishes, plus an extra 0.25 seconds buffer
@@ -201,8 +201,93 @@ local function startDetectingUltimate()
 end
 
 -- Function to stop detecting the Saitama Ultimate activation
-local function stopDetectingUltimate()
-    detectingUltimate = false
+local function stopDetectingSaitamaUltimate()
+    detectingSaitamaUltimate = false
+end
+
+-- Notify (Detect) Garou Ultimate Activation 🟢📜
+
+-- Services
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local StarterGui = game:GetService("StarterGui")
+local workspace = game:GetService("Workspace")
+
+local localPlayer = Players.LocalPlayer
+local animationId = 12342141464 -- Garou Ultimate Activation animation ID
+
+-- Store the detected players and the time their animation finishes
+local detectedPlayers = {}
+
+-- Function to check if the player is currently performing the animation
+local function isPerformingGarouAnimation(player)
+    local character = player.Character
+    if not character or not character:FindFirstChild("Humanoid") then return nil end
+    
+    local humanoid = character.Humanoid
+    -- Check if the humanoid is currently playing the animation
+    for _, anim in pairs(humanoid:GetPlayingAnimationTracks()) do
+        -- Check if the animation's AnimationId matches the target animation
+        if anim.Animation and tostring(anim.Animation.AnimationId) == "rbxassetid://" .. animationId then
+            return anim -- Return the animation track for its length
+        end
+    end
+    return nil
+end
+
+-- Function to log the player
+local function logGarouDetectedPlayer(player)
+    print("🚨 " .. player.Name .. " did the animation to Activate Garou Ultimate ")
+end
+
+-- Function to send a notification in CoreGui
+local function sendGarouNotification(player, message, title)
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = message,
+        Duration = 5
+    })
+end
+
+-- Heartbeat check to continuously detect animations
+local detectingGarouUltimate = false  -- Flag to keep track of detection state
+
+-- Function to start detecting the Garou Ultimate activation
+local function startDetectingGarouUltimate()
+    detectingGarouUltimate = true
+    -- Heartbeat check to continuously detect animations
+    RunService.Heartbeat:Connect(function()
+        if detectingGarouUltimate then
+            for _, player in pairs(Players:GetPlayers()) do
+                -- Exclude the local player
+                if player ~= localPlayer then
+                    -- Check if this player is performing the animation and hasn't been logged recently
+                    local animationTrack = isPerformingGarouAnimation(player)
+                    if animationTrack and not detectedPlayers[player] then
+                        -- Log the player and mark as detected
+                        logGarouDetectedPlayer(player)
+                        detectedPlayers[player] = true
+                        
+                        -- Send the notification to inform about the animation detection
+                        sendGarouNotification(player, 
+                            "🟡 " .. player.Name .. " probably activated Garou Ultimate because they did the animation. Be careful!", 
+                            "Garou Ultimate Detected")
+                        
+                        -- Wait until the animation finishes, plus an extra 0.25 seconds buffer
+                        wait(animationTrack.Length + 0.25)
+
+                        -- Remove the player from the detected list after the wait
+                        detectedPlayers[player] = nil
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- Function to stop detecting the Garou Ultimate activation
+local function stopDetectingGarouUltimate()
+    detectingGarouUltimate = false
 end
 
 -- Notify (Detect) Saitama Death Counter Activation 🟢📜
@@ -407,7 +492,7 @@ local Tabs = {
 
 local DetectSection = Tabs.Main:AddSection("Detect")
 
--- Create the toggles for Ultimate and Death Counter detection
+-- Saitama Ultimate Detection Toggle
 local DetectSaitamaUltimateToggle = DetectSection:AddToggle("Detect Saitama Ultimate", 
 {
     Title = "Detect Saitama Ultimate Activation", 
@@ -417,11 +502,30 @@ local DetectSaitamaUltimateToggle = DetectSection:AddToggle("Detect Saitama Ulti
         if state then
             -- Enable detection when toggle is turned on
             sendNotification("Saitama Ultimate Detection", "ON - Notifying Saitama Ultimate Activation. 🟢", 5)
-            startDetectingUltimate()  -- Start detecting logic
+            startDetectingSaitamaUltimate()  -- Start detecting Saitama Ultimate
         else
             -- Disable detection when toggle is turned off
             sendNotification("Saitama Ultimate Detection", "OFF - Not Notifying Saitama Ultimate Activation. 🔴", 5)
-            stopDetectingUltimate()  -- Stop detecting logic
+            stopDetectingSaitamaUltimate()  -- Stop detecting Saitama Ultimate
+        end
+    end 
+})
+
+-- Garou Ultimate Detection Toggle (added below Saitama toggle)
+local DetectGarouUltimateToggle = DetectSection:AddToggle("Detect Garou Ultimate", 
+{
+    Title = "Detect Garou Ultimate Activation", 
+    Description = "Will detect and notify you when another player activates Garou Ultimate.",
+    Default = false,
+    Callback = function(state)
+        if state then
+            -- Enable detection when toggle is turned on
+            sendNotification("Garou Ultimate Detection", "ON - Notifying Garou Ultimate Activation. 🟢", 5)
+            startDetectingGarouUltimate()  -- Start detecting Garou Ultimate
+        else
+            -- Disable detection when toggle is turned off
+            sendNotification("Garou Ultimate Detection", "OFF - Not Notifying Garou Ultimate Activation. 🔴", 5)
+            stopDetectingGarouUltimate()  -- Stop detecting Garou Ultimate
         end
     end 
 })
