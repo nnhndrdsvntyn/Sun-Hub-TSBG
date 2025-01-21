@@ -1,3 +1,5 @@
+-- Notify (Detect) Saitama Ultimate Activation 🟢📜
+
 -- Services
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
@@ -212,6 +214,8 @@ local function sendDeathCounterNotification(player)
     })
 end
 
+-- Detect Death Counter Animation Functionality 🟢📜
+
 -- Function to check for the "HoldingDeathCounter" attribute
 local function checkHoldingDeathCounter(player)
     -- Retrieve the target object from workspace
@@ -259,6 +263,106 @@ local function stopDetectingDeathCounter()
     detectingDeathCounter = false
 end
 
+-- Anti Death Counter Functionality 🟢
+
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+-- Variables
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local antiDeathCounterEnabled = false -- Toggle state variable
+local animationId = "rbxassetid://11343250001" -- Animation ID
+
+-- Function to update character and humanoid references on respawn
+local function updateCharacterReferences()
+    Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    Humanoid = Character:WaitForChild("Humanoid")
+end
+
+-- Function to generate random position
+local function getRandomPosition(currentPosition)
+    local randomX = math.random(20000, 50000) * (math.random(0, 1) == 0 and -1 or 1)
+    local randomZ = math.random(20000, 50000) * (math.random(0, 1) == 0 and -1 or 1)
+    return Vector3.new(currentPosition.X + randomX, -499, currentPosition.Z + randomZ)
+end
+
+-- Main functionality
+local function handleDeathCounter()
+    print("🚨 Your player seems to have gotten Death Countered")
+
+    -- Save current camera state and position
+    local originalCFrame = Camera.CFrame
+    local originalFocus = Camera.Focus
+    local playerPosition = Character.PrimaryPart.Position
+
+    -- Change camera to custom state
+    Camera.CameraType = Enum.CameraType.Scriptable
+    Camera.CFrame = originalCFrame
+
+    -- Create platform at a distant random location
+    local platformPosition = getRandomPosition(playerPosition)
+    local platform = Instance.new("Part")
+    platform.Size = Vector3.new(1500, 1, 1500)
+    platform.Position = platformPosition
+    platform.Anchored = true
+    platform.Transparency = 1
+    platform.Material = Enum.Material.Neon
+    platform.BrickColor = BrickColor.Red()
+    platform.Parent = workspace
+
+    -- Teleport player to platform
+    Character:SetPrimaryPartCFrame(CFrame.new(platformPosition + Vector3.new(0, 1, 0)))
+
+    -- Wait 13 seconds before reverting
+    task.delay(13, function()
+        -- Teleport player back
+        Character:SetPrimaryPartCFrame(CFrame.new(playerPosition))
+
+        -- Remove platform
+        platform:Destroy()
+
+        -- Restore camera state
+        Camera.CameraType = Enum.CameraType.Custom
+        Camera.CFrame = originalCFrame
+        Camera.Focus = originalFocus
+    end)
+end
+
+-- Function to detect animation
+local function detectDeathCounter()
+    Humanoid.AnimationPlayed:Connect(function(animationTrack)
+        -- Check toggle state and animation ID
+        if antiDeathCounterEnabled and animationTrack.Animation.AnimationId == animationId then
+            handleDeathCounter()
+        end
+    end)
+end
+
+-- Listen for character respawns to reapply detection logic
+LocalPlayer.CharacterAdded:Connect(function()
+    updateCharacterReferences()
+    detectDeathCounter()
+end)
+
+-- Initial setup
+detectDeathCounter()
+
+-- Services
+local StarterGui = game:GetService("StarterGui")
+
+-- Helper function for notifications
+local function sendNotification(title, text, duration)
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = duration or 5 -- Default duration is 5 seconds
+    })
+end
+
 -- Now load the UI
 local SunHubTSBGArena = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 
@@ -289,11 +393,11 @@ local DetectSaitamaUltimateToggle = DetectSection:AddToggle("Detect Saitama Ulti
     Callback = function(state)
         if state then
             -- Enable detection when toggle is turned on
-            print("Detection Enabled - Detecting Saitama Ultimate Activation")
+            sendNotification("Saitama Ultimate Detection", "ON - Notifying Saitama Ultimate Activation. 🟢", 5)
             startDetectingUltimate()  -- Start detecting logic
         else
             -- Disable detection when toggle is turned off
-            print("Detection Disabled - No longer detecting Saitama Ultimate")
+            sendNotification("Saitama Ultimate Detection", "OFF - Not Notifying Saitama Ultimate Activation. 🔴", 5)
             stopDetectingUltimate()  -- Stop detecting logic
         end
     end 
@@ -306,11 +410,27 @@ local DetectSaitamaDeathCounterToggle = DetectSection:AddToggle("Detect Saitama 
     Default = false,
     Callback = function(state)
         if state then
-            print("Death Counter Detection Enabled")
+            sendNotification("Death Counter Detection", "ON - Notifying Death Counter Activation. 🟢", 5)
             startDetectingDeathCounter()  -- Start the Death Counter detection
         else
-            print("Death Counter Detection Disabled")
+            sendNotification("Death Counter Detection", "OFF - Not Notifying Death Counter Activation. 🔴", 5)
             stopDetectingDeathCounter()  -- Stop the Death Counter detection
         end
     end 
+})
+
+-- New toggle for Anti-Death Counter
+local AntiDeathCounterToggle = DetectSection:AddToggle("AntiDeathCounterToggle", 
+{
+    Title = "Anti Death Counter", 
+    Description = "Will kill the person who death countered you, and will save you from dying to the death counter.",
+    Default = false,
+    Callback = function(state)
+        antiDeathCounterEnabled = state
+        if state then
+            sendNotification("Anti Death Counter", "ON - Anti Death Counter is on. 🟢", 5)
+        else
+            sendNotification("Anti Death Counter", "OFF - Anti Death Counter is off. 🔴", 5)
+        end
+    end
 })
