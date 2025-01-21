@@ -205,33 +205,57 @@ local function stopDetectingUltimate()
     detectingUltimate = false
 end
 
+-- Notify (Detect) Saitama Death Counter Activation 🟢📜
+
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local LocalPlayer = Players.LocalPlayer
+
+-- Table to track the cooldown for each player
+local playerCooldowns = {}
+
+-- Cooldown duration (in seconds)
+local cooldownDuration = 1.5
+
 -- Function to send the Death Counter notification
 local function sendDeathCounterNotification(player)
     StarterGui:SetCore("SendNotification", {
         Title = "🟢 " .. player.Name .. " Activated Death Counter",
         Text = "When this notification disappears, then their Death Counter is gone",
-        Duration = 10.5  -- Notification duration set to 10.5 seconds
+        Duration = 10.5 -- Notification duration set to 10.5 seconds
     })
 end
 
--- Detect Death Counter Animation Functionality 🟢📜
+-- Detect Death Counter Animation Functionality
 
 -- Function to check for the "HoldingDeathCounter" attribute
 local function checkHoldingDeathCounter(player)
     -- Retrieve the target object from workspace
-    local detectedPlayerPath = workspace:WaitForChild("Live"):WaitForChild(player.Name)
-    
+    local detectedPlayerPath = workspace:WaitForChild("Live"):FindFirstChild(player.Name)
+
     -- Check if the object exists
     if detectedPlayerPath then
-        -- Iterate through all attributes of the object
-        for attributeName, attributeValue in pairs(detectedPlayerPath:GetAttributes()) do
-            -- Check if the attribute name is 'HoldingDeathCounter' and if it is true
-            if attributeName == "HoldingDeathCounter" and attributeValue == true then
-                -- Log the state
-                print("🟢 " .. player.Name .. " activated Death Counter")
+        -- Get the "HoldingDeathCounter" attribute
+        local holdingDeathCounter = detectedPlayerPath:GetAttribute("HoldingDeathCounter")
+
+        -- If the attribute exists and is true
+        if holdingDeathCounter then
+            -- Get the current time
+            local currentTime = os.clock()
+
+            -- Check if the cooldown has elapsed for this player
+            if not playerCooldowns[player.Name] or (currentTime - playerCooldowns[player.Name] >= cooldownDuration) then
+                -- Update the cooldown time for this player
+                playerCooldowns[player.Name] = currentTime
+
                 -- Send the notification
                 sendDeathCounterNotification(player)
             end
+        else
+            -- Remove the player from cooldowns if the attribute is false or nil
+            playerCooldowns[player.Name] = nil
         end
     else
         print("❗ " .. player.Name .. " not found in workspace.Live")
@@ -244,12 +268,11 @@ local detectingDeathCounter = false
 -- Function to start detecting the Death Counter activation
 local function startDetectingDeathCounter()
     detectingDeathCounter = true
-    -- Heartbeat check to continuously detect the attribute
     RunService.Heartbeat:Connect(function()
         if detectingDeathCounter then
             for _, player in pairs(Players:GetPlayers()) do
                 -- Exclude the local player
-                if player ~= localPlayer then
+                if player ~= LocalPlayer then
                     -- Check if this player has the "HoldingDeathCounter" attribute
                     checkHoldingDeathCounter(player)
                 end
