@@ -419,8 +419,10 @@ local DetectSaitamaDeathCounterToggle = DetectSection:AddToggle("Detect Saitama 
     end 
 })
 
+local AntiSection = Tabs.Main:AddSection("Anti")
+
 -- New toggle for Anti-Death Counter
-local AntiDeathCounterToggle = DetectSection:AddToggle("AntiDeathCounterToggle", 
+local AntiDeathCounterToggle = AntiSection:AddToggle("AntiDeathCounterToggle", 
 {
     Title = "Anti Death Counter", 
     Description = "Will kill the person who death countered you, and will save you from dying to the death counter.",
