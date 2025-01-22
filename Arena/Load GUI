@@ -487,13 +487,18 @@ local Window = SunHubTSBGArena:CreateWindow({
 -- Fluent provides Lucide Icons, they are optional
 local Tabs = {
     Main = Window:AddTab({ Title = "Main", Icon = "" }),
-    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
+    Settings = Window:AddTab({ Title = "Settings", Icon = "settings" }),
+    Exploits = Window:AddTab({ Title = "Exploits", Icon = "binary" }),
+    Visual = Window:AddTab({ Title = "Visual", Icon = "eye" })
+
 }
 
-local DetectSection = Tabs.Main:AddSection("Detect")
+local DetectSection = Tabs.Visual:AddSection("Detect")
+
+local SaitamaDetectSection = Tabs.Visual:AddSection("Detect - Saitama")
 
 -- Saitama Ultimate Detection Toggle
-local DetectSaitamaUltimateToggle = DetectSection:AddToggle("Detect Saitama Ultimate", 
+local DetectSaitamaUltimateToggle = SaitamaDetectSection:AddToggle("Detect Saitama Ultimate", 
 {
     Title = "Detect Saitama Ultimate Activation", 
     Description = "Will detect and notify you when another player activates Saitama Ultimate.",
@@ -511,8 +516,26 @@ local DetectSaitamaUltimateToggle = DetectSection:AddToggle("Detect Saitama Ulti
     end 
 })
 
+local DetectSaitamaDeathCounterToggle = SaitamaDetectSection:AddToggle("Detect Saitama Death Counter", 
+{
+    Title = "Detect Death Counter Activation", 
+    Description = "Will detect and notify you when another player activates Saitama Death Counter.",
+    Default = false,
+    Callback = function(state)
+        if state then
+            sendNotification("Death Counter Detection", "ON - Notifying Death Counter Activation. 🟢", 5)
+            startDetectingDeathCounter()  -- Start the Death Counter detection
+        else
+            sendNotification("Death Counter Detection", "OFF - Not Notifying Death Counter Activation. 🔴", 5)
+            stopDetectingDeathCounter()  -- Stop the Death Counter detection
+        end
+    end 
+})
+
+local GarouDetectSection = Tabs.Visual:AddSection("Detect - Garou")
+
 -- Garou Ultimate Detection Toggle (added below Saitama toggle)
-local DetectGarouUltimateToggle = DetectSection:AddToggle("Detect Garou Ultimate", 
+local DetectGarouUltimateToggle = GarouDetectSection:AddToggle("Detect Garou Ultimate", 
 {
     Title = "Detect Garou Ultimate Activation", 
     Description = "Will detect and notify you when another player activates Garou Ultimate.",
@@ -530,23 +553,7 @@ local DetectGarouUltimateToggle = DetectSection:AddToggle("Detect Garou Ultimate
     end 
 })
 
-local DetectSaitamaDeathCounterToggle = DetectSection:AddToggle("Detect Saitama Death Counter", 
-{
-    Title = "Detect Death Counter Activation", 
-    Description = "Will detect and notify you when another player activates Saitama Death Counter.",
-    Default = false,
-    Callback = function(state)
-        if state then
-            sendNotification("Death Counter Detection", "ON - Notifying Death Counter Activation. 🟢", 5)
-            startDetectingDeathCounter()  -- Start the Death Counter detection
-        else
-            sendNotification("Death Counter Detection", "OFF - Not Notifying Death Counter Activation. 🔴", 5)
-            stopDetectingDeathCounter()  -- Stop the Death Counter detection
-        end
-    end 
-})
-
-local AntiSection = Tabs.Main:AddSection("Anti")
+local AntiSection = Tabs.Exploits:AddSection("Anti")
 
 -- New toggle for Anti-Death Counter
 local AntiDeathCounterToggle = AntiSection:AddToggle("AntiDeathCounterToggle", 
