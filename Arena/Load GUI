@@ -280,13 +280,63 @@ end
 
 -- Function to remove ESP for a player
 local function removePlayerESP(player)
-    if ESPParts[player] then
-        for _, espPart in ipairs(ESPParts[player]) do
+    if not ESPParts[player] then
+        return -- If no ESP parts exist for this player, just exit
+    end
+
+    for _, espPart in ipairs(ESPParts[player]) do
+        if espPart then
             espPart:Destroy()
         end
-        ESPParts[player] = nil
     end
+
+    ESPParts[player] = nil -- Cleanup the player's ESP entry
 end
+
+local function addPlayerESP(player)
+    local character = player.Character
+    if not character then return end
+
+    -- Remove any existing ESP parts for this player
+    removePlayerESP(player)
+
+    ESPParts[player] = {} -- Reset ESP parts for this player
+
+    -- Parts to highlight
+    local parts = {
+        character:WaitForChild("Head"),
+        character:WaitForChild("Left Arm"),
+        character:WaitForChild("Right Arm"),
+        character:WaitForChild("Left Leg"),
+        character:WaitForChild("Right Leg"),
+        character:WaitForChild("Torso")
+    }
+
+    for _, part in ipairs(parts) do
+        local box = createESPBox(part)
+        table.insert(ESPParts[player], box)
+    end
+
+    -- Schedule ESP removal after 10.25 seconds
+    task.delay(10.25, function()
+        if not player then
+            warn("Player is nil when attempting to remove ESP!")
+            return
+        end
+
+        if not ESPParts[player] then
+            warn("ESPParts entry for player " .. player.Name .. " does not exist!")
+            return
+        end
+
+        removePlayerESP(player)
+    end)
+end
+
+-- Clean up ESP when a player leaves
+Players.PlayerRemoving:Connect(function(player)
+    removePlayerESP(player)
+end)
 
 -- Function to add a "Death Counter! 💀" billboard above the detected player's head
 local function addBillboardText(player)
@@ -778,4 +828,4 @@ local AntiDeathCounterToggle = AntiSection:AddToggle("AntiDeathCounterToggle",
     end
 })
 
-print("update1")
+print("update 2")
