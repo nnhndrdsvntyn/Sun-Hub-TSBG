@@ -238,7 +238,7 @@ local function createESPBox(part)
     box.ZIndex = 10
     box.Size = part.Size
     box.Color3 = Color3.new(1, 0, 0) -- Red color
-    box.Transparency = 0.01
+    box.Transparency = 0.5
     box.Parent = part
     return box
 end
