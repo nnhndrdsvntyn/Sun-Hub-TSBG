@@ -828,4 +828,4 @@ local AntiDeathCounterToggle = AntiSection:AddToggle("AntiDeathCounterToggle",
     end
 })
 
-print("update 2")
+print("update 3")
