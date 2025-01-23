@@ -205,6 +205,177 @@ local function stopDetectingSaitamaUltimate()
     detectingSaitamaUltimate = false
 end
 
+-- Notify (Detect) Saitama Death Counter Activation 🟢📜
+
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
+local Workspace = game:GetService("Workspace")
+local LocalPlayer = Players.LocalPlayer
+
+-- Table to track the cooldown for each player
+local playerCooldowns = {}
+
+-- Cooldown duration (in seconds)
+local cooldownDuration = 1.5
+local ESPParts = {} -- Stores ESP parts for cleanup
+
+-- Function to send the Death Counter notification
+local function sendDeathCounterNotification(player)
+    StarterGui:SetCore("SendNotification", {
+        Title = "🟢 " .. player.Name .. " Activated Death Counter",
+        Text = "When this notification disappears, then their Death Counter is gone",
+        Duration = 10.5 -- Notification duration set to 10.5 seconds
+    })
+end
+
+-- Function to create a red ESP box
+local function createESPBox(part)
+    local box = Instance.new("BoxHandleAdornment")
+    box.Adornee = part
+    box.AlwaysOnTop = true
+    box.ZIndex = 10
+    box.Size = part.Size
+    box.Color3 = Color3.new(1, 0, 0) -- Red color
+    box.Transparency = 0.01
+    box.Parent = part
+    return box
+end
+
+-- Function to add red ESP for a player
+local function addPlayerESP(player)
+    local character = player.Character
+    if not character then return end
+
+    -- Remove any existing ESP parts for this player
+    if ESPParts[player] then
+        for _, espPart in ipairs(ESPParts[player]) do
+            espPart:Destroy()
+        end
+    end
+
+    ESPParts[player] = {} -- Reset ESP parts for this player
+
+    -- Parts to highlight
+    local parts = {
+        character:WaitForChild("Head"),
+        character:WaitForChild("Left Arm"),
+        character:WaitForChild("Right Arm"),
+        character:WaitForChild("Left Leg"),
+        character:WaitForChild("Right Leg"),
+        character:WaitForChild("Torso")
+    }
+
+    for _, part in ipairs(parts) do
+        local box = createESPBox(part)
+        table.insert(ESPParts[player], box)
+    end
+end
+
+-- Function to remove ESP for a player
+local function removePlayerESP(player)
+    if ESPParts[player] then
+        for _, espPart in ipairs(ESPParts[player]) do
+            espPart:Destroy()
+        end
+        ESPParts[player] = nil
+    end
+end
+
+-- Function to add a "Death Counter! 💀" billboard above the detected player's head
+local function addBillboardText(player)
+    local character = player.Character
+    if not character or not character:FindFirstChild("Head") then return end
+
+    -- Create the BillboardGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "DeathCounterBillboard"
+    billboard.Adornee = character.Head
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 4.75, 0)
+    billboard.AlwaysOnTop = true
+
+    -- Create the TextLabel
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextScaled = false
+    label.TextSize = 20
+    label.Font = Enum.Font.SourceSansBold
+    label.Text = "Death Counter! 💀"
+    label.TextColor3 = Color3.new(1, 0, 0) -- Red text
+    label.Parent = billboard
+
+    -- Parent the BillboardGui to the character's head
+    billboard.Parent = character.Head
+end
+
+-- Detect Death Counter Animation Functionality
+
+-- Function to check for the "HoldingDeathCounter" attribute
+local function checkHoldingDeathCounter(player)
+    -- Retrieve the target object from workspace
+    local detectedPlayerPath = Workspace:WaitForChild("Live"):FindFirstChild(player.Name)
+
+    -- Check if the object exists
+    if detectedPlayerPath then
+        -- Get the "HoldingDeathCounter" attribute
+        local holdingDeathCounter = detectedPlayerPath:GetAttribute("HoldingDeathCounter")
+
+        -- If the attribute exists and is true
+        if holdingDeathCounter then
+            -- Get the current time
+            local currentTime = os.clock()
+
+            -- Check if the cooldown has elapsed for this player
+            if not playerCooldowns[player.Name] or (currentTime - playerCooldowns[player.Name] >= cooldownDuration) then
+                -- Update the cooldown time for this player
+                playerCooldowns[player.Name] = currentTime
+
+                -- Send the notification
+                sendDeathCounterNotification(player)
+
+                -- Add the billboard above the player's head
+                addBillboardText(player)
+
+                -- Add red ESP for the player
+                addPlayerESP(player)
+            end
+        else
+            -- Remove the player from cooldowns and ESP if the attribute is false or nil
+            playerCooldowns[player.Name] = nil
+            removePlayerESP(player)
+        end
+    else
+        print("❗ " .. player.Name .. " not found in workspace.Live")
+    end
+end
+
+-- Heartbeat check to continuously detect the "HoldingDeathCounter" attribute
+local detectingDeathCounter = false
+
+-- Function to start detecting the Death Counter activation
+local function startDetectingDeathCounter()
+    detectingDeathCounter = true
+    RunService.Heartbeat:Connect(function()
+        if detectingDeathCounter then
+            for _, player in pairs(Players:GetPlayers()) do
+                -- Exclude the local player
+                if player ~= LocalPlayer then
+                    -- Check if this player has the "HoldingDeathCounter" attribute
+                    checkHoldingDeathCounter(player)
+                end
+            end
+        end
+    end)
+end
+
+-- Function to stop detecting the Death Counter activation
+local function stopDetectingDeathCounter()
+    detectingDeathCounter = false
+end
+
 -- Notify (Detect) Garou Ultimate Activation 🟢📜
 
 -- Services
@@ -394,87 +565,6 @@ end
 -- Function to stop detecting the Garou Ultimate activation
 local function stopDetectingGarouUltimate()
     detectingGarouUltimate = false
-end
-
--- Notify (Detect) Saitama Death Counter Activation 🟢📜
-
--- Services
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local StarterGui = game:GetService("StarterGui")
-local LocalPlayer = Players.LocalPlayer
-
--- Table to track the cooldown for each player
-local playerCooldowns = {}
-
--- Cooldown duration (in seconds)
-local cooldownDuration = 1.5
-
--- Function to send the Death Counter notification
-local function sendDeathCounterNotification(player)
-    StarterGui:SetCore("SendNotification", {
-        Title = "🟢 " .. player.Name .. " Activated Death Counter",
-        Text = "When this notification disappears, then their Death Counter is gone",
-        Duration = 10.5 -- Notification duration set to 10.5 seconds
-    })
-end
-
--- Detect Death Counter Animation Functionality
-
--- Function to check for the "HoldingDeathCounter" attribute
-local function checkHoldingDeathCounter(player)
-    -- Retrieve the target object from workspace
-    local detectedPlayerPath = workspace:WaitForChild("Live"):FindFirstChild(player.Name)
-
-    -- Check if the object exists
-    if detectedPlayerPath then
-        -- Get the "HoldingDeathCounter" attribute
-        local holdingDeathCounter = detectedPlayerPath:GetAttribute("HoldingDeathCounter")
-
-        -- If the attribute exists and is true
-        if holdingDeathCounter then
-            -- Get the current time
-            local currentTime = os.clock()
-
-            -- Check if the cooldown has elapsed for this player
-            if not playerCooldowns[player.Name] or (currentTime - playerCooldowns[player.Name] >= cooldownDuration) then
-                -- Update the cooldown time for this player
-                playerCooldowns[player.Name] = currentTime
-
-                -- Send the notification
-                sendDeathCounterNotification(player)
-            end
-        else
-            -- Remove the player from cooldowns if the attribute is false or nil
-            playerCooldowns[player.Name] = nil
-        end
-    else
-        print("❗ " .. player.Name .. " not found in workspace.Live")
-    end
-end
-
--- Heartbeat check to continuously detect the "HoldingDeathCounter" attribute
-local detectingDeathCounter = false
-
--- Function to start detecting the Death Counter activation
-local function startDetectingDeathCounter()
-    detectingDeathCounter = true
-    RunService.Heartbeat:Connect(function()
-        if detectingDeathCounter then
-            for _, player in pairs(Players:GetPlayers()) do
-                -- Exclude the local player
-                if player ~= LocalPlayer then
-                    -- Check if this player has the "HoldingDeathCounter" attribute
-                    checkHoldingDeathCounter(player)
-                end
-            end
-        end
-    end)
-end
-
--- Function to stop detecting the Death Counter activation
-local function stopDetectingDeathCounter()
-    detectingDeathCounter = false
 end
 
 -- Anti Death Counter Functionality 🟢
