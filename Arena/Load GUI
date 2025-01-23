@@ -271,6 +271,11 @@ local function addPlayerESP(player)
         local box = createESPBox(part)
         table.insert(ESPParts[player], box)
     end
+
+    -- Schedule ESP removal after 10.25 seconds
+    task.delay(10.25, function()
+        removePlayerESP(player)
+    end)
 end
 
 -- Function to remove ESP for a player
@@ -309,6 +314,13 @@ local function addBillboardText(player)
 
     -- Parent the BillboardGui to the character's head
     billboard.Parent = character.Head
+
+    -- Automatically remove the billboard after 10.25 seconds
+    task.delay(10.25, function()
+        if billboard and billboard.Parent then
+            billboard:Destroy()
+        end
+    end)
 end
 
 -- Detect Death Counter Animation Functionality
@@ -343,9 +355,8 @@ local function checkHoldingDeathCounter(player)
                 addPlayerESP(player)
             end
         else
-            -- Remove the player from cooldowns and ESP if the attribute is false or nil
+            -- Remove the player from cooldowns if the attribute is false or nil
             playerCooldowns[player.Name] = nil
-            removePlayerESP(player)
         end
     else
         print("❗ " .. player.Name .. " not found in workspace.Live")
