@@ -211,13 +211,109 @@ end
 local RunService = game:GetService("RunService")
 local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
-local workspace = game:GetService("Workspace")
+local Workspace = game:GetService("Workspace")
 
 local localPlayer = Players.LocalPlayer
 local animationId = 12342141464 -- Garou Ultimate Activation animation ID
 
 -- Store the detected players and the time their animation finishes
 local detectedPlayers = {}
+local ESPParts = {} -- Stores ESP parts for cleanup
+
+-- Function to create a box
+local function createESPBox(part, color)
+    local box = Instance.new("BoxHandleAdornment")
+    box.Adornee = part
+    box.AlwaysOnTop = true
+    box.ZIndex = 10
+    box.Size = part.Size
+    box.Color3 = color -- Dynamic color
+    box.Transparency = 0.01
+    box.Parent = part
+    return box
+end
+
+-- Function to add ESP for a player
+local function addPlayerESP(player)
+    local character = player.Character
+    if not character then return end
+
+    -- Remove any existing ESP parts for this player
+    if ESPParts[player] then
+        for _, espPart in ipairs(ESPParts[player]) do
+            espPart:Destroy()
+        end
+    end
+
+    ESPParts[player] = {} -- Reset ESP parts for this player
+
+    -- Parts to highlight
+    local parts = {
+        character:WaitForChild("Head"),
+        character:WaitForChild("Left Arm"),
+        character:WaitForChild("Right Arm"),
+        character:WaitForChild("Left Leg"),
+        character:WaitForChild("Right Leg"),
+        character:WaitForChild("Torso")
+    }
+
+    for _, part in ipairs(parts) do
+        local color = Color3.new(1, 0, 0) -- Default red
+        if part.Name == "Torso" then
+            color = Color3.new(0, 255, 255) -- Blue for the torso
+        end
+        local box = createESPBox(part, color)
+        table.insert(ESPParts[player], box)
+    end
+end
+
+-- Function to remove ESP for a player
+local function removePlayerESP(player)
+    if ESPParts[player] then
+        for _, espPart in ipairs(ESPParts[player]) do
+            espPart:Destroy()
+        end
+        ESPParts[player] = nil
+    end
+end
+
+-- Function to add a billboard text over the player's head
+local function addBillboardText(player, text)
+    local character = player.Character
+    if not character or not character:FindFirstChild("Head") then return end
+
+    -- Create the BillboardGui
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "GarouUltimateBillboard"
+    billboard.Adornee = character.Head
+    billboard.Size = UDim2.new(0, 100, 0, 50)
+    billboard.StudsOffset = Vector3.new(0, 2, 0)
+    billboard.AlwaysOnTop = true
+
+    -- Create the TextLabel
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.TextScaled = true
+    label.Font = Enum.Font.SourceSansBold
+    label.Text = text
+    label.TextColor3 = Color3.new(0, 255, 255) -- Yellow text
+    label.Parent = billboard
+
+    -- Parent the BillboardGui to the character's head
+    billboard.Parent = character.Head
+end
+
+-- Function to remove the billboard text from the player's head
+local function removeBillboardText(player)
+    local character = player.Character
+    if not character or not character:FindFirstChild("Head") then return end
+
+    local billboard = character.Head:FindFirstChild("GarouUltimateBillboard")
+    if billboard then
+        billboard:Destroy()
+    end
+end
 
 -- Function to check if the player is currently performing the animation
 local function isPerformingGarouAnimation(player)
@@ -250,7 +346,7 @@ local function sendGarouNotification(player, message, title)
 end
 
 -- Heartbeat check to continuously detect animations
-local detectingGarouUltimate = false  -- Flag to keep track of detection state
+local detectingGarouUltimate = false -- Flag to keep track of detection state
 
 -- Function to start detecting the Garou Ultimate activation
 local function startDetectingGarouUltimate()
@@ -273,10 +369,20 @@ local function startDetectingGarouUltimate()
                             "🟡 " .. player.Name .. " probably activated Garou Ultimate because they did the animation. Be careful!", 
                             "Garou Ultimate Detected")
                         
-                        -- Wait until the animation finishes, plus an extra 0.25 seconds buffer
-                        wait(animationTrack.Length + 0.25)
+                        -- Add ESP to the player
+                        addPlayerESP(player)
 
-                        -- Remove the player from the detected list after the wait
+                        -- Add the billboard text
+                        addBillboardText(player, "🟡 Activating Garou Ultimate...")
+
+                        -- Wait until the animation finishes, plus an extra 0.25 seconds buffer
+                        wait(animationTrack.Length - 1)
+
+                        -- Remove the ESP and billboard text
+                        removePlayerESP(player)
+                        removeBillboardText(player)
+
+                        -- Remove the player from the detected list
                         detectedPlayers[player] = nil
                     end
                 end
