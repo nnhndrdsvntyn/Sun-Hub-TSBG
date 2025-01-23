@@ -777,3 +777,5 @@ local AntiDeathCounterToggle = AntiSection:AddToggle("AntiDeathCounterToggle",
         end
     end
 })
+
+print("update1")
